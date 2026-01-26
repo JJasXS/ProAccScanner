@@ -1,0 +1,108 @@
+@page
+@model FirebirdWeb.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="login-page">
+    <div class="login-container">
+        <h2>Login</h2>
+
+        <form method="post">
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" asp-for="Username" required />
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" asp-for="Password" required />
+            </div>
+            <button type="submit">Login</button>
+
+            <div class="errors">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Login page container below global header */
+.login-page {
+    display: flex;
+    justify-content: center; /* center horizontally */
+    padding-top: 100px; /* space below header */
+    min-height: calc(100vh - 60px); /* full page minus header height */
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Login box */
+.login-container {
+    background-color: #fff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    width: 350px;
+    text-align: center;
+}
+
+/* Header inside box */
+.login-container h2 {
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* Form fields */
+.login-container label {
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.login-container input[type="text"]:focus,
+.login-container input[type="password"]:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102,126,234,0.5);
+}
+
+/* Submit button */
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-container button:hover {
+    background: #5a67d8;
+}
+
+/* Error messages */
+.login-container .errors {
+    margin-top: 15px;
+    color: #e74c3c;
+    font-size: 14px;
+}
+</style>

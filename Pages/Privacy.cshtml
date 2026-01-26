@@ -1,0 +1,19 @@
+﻿@page
+@model IndexModel
+
+<h2>Agents</h2>
+<table border="1">
+    <tr>
+        <th>Code</th>
+        <th>Description</th>
+        <th>IsActive</th>
+    </tr>
+    @foreach (var row in Model.Agents)
+    {
+        <tr>
+            <td>@row["CODE"]</td>
+            <td>@row["DESCRIPTION"]</td>
+            <td>@row["ISACTIVE"]</td>
+        </tr>
+    }
+</table>
