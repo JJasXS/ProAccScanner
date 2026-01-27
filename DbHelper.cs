@@ -48,4 +48,18 @@ public class DbHelper
 
         return results;
     }
+
+    // Method to execute INSERT, UPDATE, DELETE queries
+    public int ExecuteNonQuery(string sql)
+    {
+        using (var conn = new FbConnection(_connectionString))
+        {
+            conn.Open();
+
+            using (var cmd = new FbCommand(sql, conn))
+            {
+                return cmd.ExecuteNonQuery();
+            }
+        }
+    }
 }

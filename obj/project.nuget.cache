@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "F3l+Bn2lLtJDsf7uvCWJejlEtSP7uCDg+d4YP2C1g+VzAlkwgK0OAylVgPfgxpUNr4GNjPNmRRNAI1AmslrQNw==",
+  "dgSpecHash": "n+jH10nHjspx8HtddHPJtHHhae1kEwtjRLkq3dXaFjhTCMtSER5S/W65yTJ88RA6D3zr+/a4pse91TKcipfbPw==",
   "success": true,
   "projectFilePath": "C:\\Users\\sd01\\ScannerTest\\FirebirdWeb\\FirebirdWeb.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\sd01\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\sd01\\.nuget\\packages\\firebirdsql.data.firebirdclient\\10.3.4\\firebirdsql.data.firebirdclient.10.3.4.nupkg.sha512",
     "C:\\Users\\sd01\\.nuget\\packages\\runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "C:\\Users\\sd01\\.nuget\\packages\\runtime.win-arm64.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-arm64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",

@@ -32,3 +32,4 @@ C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win-x64\native\s
 C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win-x86\native\sni.dll
 C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\unix\lib\net6.0\System.Data.SqlClient.dll
 C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Data.SqlClient.dll
+C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\BCrypt.Net-Next.dll
