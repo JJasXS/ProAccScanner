@@ -22,14 +22,25 @@
 
 <script>
 document.getElementById('sendBtn').addEventListener('click', async () => {
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+        document.getElementById('message').innerText = "Please enter an email.";
+        return;
+    }
+
     const formData = new FormData();
     formData.append('Email', email);
 
-    const res = await fetch('@Url.Page("Login", "SendOTP")', {
+    // Corrected URL for Razor Page handler
+    const res = await fetch('@Url.Page("/Login", null, new { handler = "SendOTP" })', {
         method: 'POST',
         body: formData
     });
+
+    if (!res.ok) {
+        document.getElementById('message').innerText = "Error sending OTP.";
+        return;
+    }
 
     const data = await res.json();
     document.getElementById('message').innerText = data.message;
@@ -40,18 +51,34 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
 });
 
 document.getElementById('verifyBtn').addEventListener('click', async () => {
-    const email = document.getElementById('email').value;
-    const otp = document.getElementById('otp').value;
+    const email = document.getElementById('email').value.trim();
+    const otp = document.getElementById('otp').value.trim();
+    if (!email || !otp) {
+        document.getElementById('message').innerText = "Please enter email and OTP.";
+        return;
+    }
+
     const formData = new FormData();
     formData.append('Email', email);
     formData.append('OTP', otp);
 
-    const res = await fetch('@Url.Page("Login", "VerifyOTP")', {
+    // Corrected URL for Razor Page handler
+    const res = await fetch('@Url.Page("/Login", null, new { handler = "VerifyOTP" })', {
         method: 'POST',
         body: formData
     });
 
+    if (!res.ok) {
+        document.getElementById('message').innerText = "Error verifying OTP.";
+        return;
+    }
+
     const data = await res.json();
     document.getElementById('message').innerText = data.message;
+
+    if (data.success) {
+        // Optionally, redirect to home page after successful login
+        // window.location.href = '/Index';
+    }
 });
 </script>
