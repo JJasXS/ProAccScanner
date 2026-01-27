@@ -214,6 +214,11 @@
                 <input type="password" id="passwd" name="passwd" required placeholder="At least 6 characters" />
             </div>
 
+            <div class="form-group">
+                <label for="passwdConfirm">Confirm Password:</label>
+                <input type="password" id="passwdConfirm" name="passwdConfirm" required placeholder="Confirm your password" />
+            </div>
+
             <button type="submit">Register</button>
 
             <div class="form-footer">
@@ -230,9 +235,26 @@
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const formData = new FormData(this);
+            const passwd = document.getElementById('passwd').value;
+            const passwdConfirm = document.getElementById('passwdConfirm').value;
             const errorContainer = document.getElementById('errorContainer');
             errorContainer.innerHTML = '';
+
+            // Validate passwords match
+            if (passwd !== passwdConfirm) {
+                errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">Passwords do not match</div>`;
+                return;
+            }
+
+            // Validate password length
+            if (passwd.length < 6) {
+                errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">Password must be at least 6 characters</div>`;
+                return;
+            }
+
+            const formData = new FormData(this);
+            // Remove the confirm password field before sending (server only needs passwd)
+            formData.delete('passwdConfirm');
 
             try {
                 const response = await fetch('/api/registration/register', {
@@ -243,14 +265,8 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Show success popup
-                    const popup = document.getElementById('successPopup');
-                    popup.classList.add('show');
-
-                    // Redirect to login after 1 second
-                    setTimeout(() => {
-                        window.location.href = '/Login';
-                    }, 1000);
+                    // Redirect to login with success parameter
+                    window.location.href = '/Login?registered=true';
                 } else {
                     // Show error message
                     errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">${data.error || 'Registration failed'}</div>`;

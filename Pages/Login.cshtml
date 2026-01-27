@@ -4,105 +4,280 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="login-page">
-    <div class="login-container">
-        <h2>Login</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - FirebirdWeb</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        <form method="post">
+        html, body {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 50px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-container h2 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 32px;
+            text-align: center;
+        }
+
+        .login-container p {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102,126,234,0.3);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #fadbd8;
+            border-left: 4px solid #e74c3c;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .popup-message {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 0 0 8px 8px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        .popup-message.show {
+            display: block;
+            animation: slideDown 0.5s ease-out forwards;
+        }
+
+        @@keyframes slideDown {
+            0% {
+                top: -100px;
+                opacity: 0;
+            }
+            100% {
+                top: 0;
+                opacity: 1;
+            }
+        }
+
+        @@keyframes slideUp {
+            0% {
+                top: 0;
+                opacity: 1;
+            }
+            100% {
+                top: -100px;
+                opacity: 0;
+            }
+        }
+
+        @@media (max-width: 500px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+
+            .login-container h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Welcome Back</h2>
+        <p>Login to your account</p>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm">
             <div class="form-group">
-                <label>Username:</label>
-                <input type="text" asp-for="Username" required />
+                <label for="code">User Code:</label>
+                <input type="text" id="code" name="code" required placeholder="Enter your user code" />
             </div>
+
             <div class="form-group">
-                <label>Password:</label>
-                <input type="password" asp-for="Password" required />
+                <label for="passwd">Password:</label>
+                <input type="password" id="passwd" name="passwd" required placeholder="Enter your password" />
             </div>
+
             <button type="submit">Login</button>
 
-            <div class="errors">
-                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    <div>@error.ErrorMessage</div>
-                }
+            <div class="form-footer">
+                Don't have an account? <a asp-page="/Register">Register here</a>
             </div>
         </form>
     </div>
-</div>
 
-<style>
-/* Login page container below global header */
-.login-page {
-    display: flex;
-    justify-content: center; /* center horizontally */
-    padding-top: 100px; /* space below header */
-    min-height: calc(100vh - 60px); /* full page minus header height */
-    background: linear-gradient(135deg, #667eea, #764ba2);
-}
+    <div id="successPopup" class="popup-message">
+        Login Successful!
+    </div>
 
-/* Login box */
-.login-container {
-    background-color: #fff;
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    width: 350px;
-    text-align: center;
-}
+    <script>
+        // Check if coming from registration
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('registered') === 'true') {
+            const popup = document.getElementById('successPopup');
+            popup.textContent = 'Registration Successful!';
+            popup.classList.add('show');
 
-/* Header inside box */
-.login-container h2 {
-    margin-bottom: 25px;
-    color: #333;
-}
+            // Remove the query parameter from URL
+            window.history.replaceState({}, document.title, window.location.pathname);
 
-/* Form fields */
-.login-container label {
-    display: block;
-    text-align: left;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #555;
-}
+            // Hide popup after 2 seconds
+            setTimeout(() => {
+                popup.style.animation = 'slideUp 0.5s ease-out forwards';
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                    popup.style.animation = '';
+                }, 500);
+            }, 2000);
+        }
 
-.login-container input[type="text"],
-.login-container input[type="password"] {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    outline: none;
-    transition: 0.3s;
-}
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-.login-container input[type="text"]:focus,
-.login-container input[type="password"]:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 5px rgba(102,126,234,0.5);
-}
+            const code = document.getElementById('code').value;
+            const passwd = document.getElementById('passwd').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorMessage.classList.remove('show');
+            errorMessage.textContent = '';
 
-/* Submit button */
-.login-container button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background: #667eea;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
+            try {
+                const formData = new FormData();
+                formData.append('code', code);
+                formData.append('passwd', passwd);
 
-.login-container button:hover {
-    background: #5a67d8;
-}
+                const response = await fetch('/api/login/authenticate', {
+                    method: 'POST',
+                    body: formData
+                });
 
-/* Error messages */
-.login-container .errors {
-    margin-top: 15px;
-    color: #e74c3c;
-    font-size: 14px;
-}
-</style>
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store user info in session/localStorage
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Redirect to dashboard with success parameter
+                    window.location.href = '/Dashboard?loggedIn=true';
+                } else {
+                    // Show error message
+                    errorMessage.textContent = data.error || 'Login failed';
+                    errorMessage.classList.add('show');
+                }
+            } catch (error) {
+                errorMessage.textContent = 'An error occurred: ' + error.message;
+                errorMessage.classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
