@@ -41,6 +41,10 @@
             "FirebirdSql.Data.FirebirdClient": {
               "target": "Package",
               "version": "[10.3.4, )"
+            },
+            "System.Data.SqlClient": {
+              "target": "Package",
+              "version": "[4.9.0, )"
             }
           },
           "imports": [

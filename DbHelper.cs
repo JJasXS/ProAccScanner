@@ -9,7 +9,7 @@ public class DbHelper
     // Constructor sets the connection string
     public DbHelper()
     {
-        _connectionString = @"User=SYSDBA;Password=masterkey;Database=C:\Program Files (x86)\eStream\SQLAccounting\bin\ACC-0001.FDB;DataSource=localhost;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
+        _connectionString = @"User=SYSDBA;Password=masterkey;Database=D:\SQLData\DB\ACC-TEST.FDB;DataSource=localhost;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
     }
 
     // Method to open and return a connection (optional, if needed elsewhere)
