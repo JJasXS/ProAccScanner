@@ -4,6 +4,7 @@ using FirebirdWeb.Helpers;
 
 namespace FirebirdWeb.Pages
 {
+    [IgnoreAntiforgeryToken] // Allow AJAX POSTs without antiforgery token
     public class LoginModel : PageModel
     {
         private readonly EmailHelper _emailHelper;
@@ -46,7 +47,15 @@ namespace FirebirdWeb.Pages
                 // Optional: remove OTP after verification
                 // TempOTPStore.RemoveOTP(Email);
 
-                return new JsonResult(new { success = true, message = "OTP verified successfully" });
+                // Mark user as "logged in" using session
+                HttpContext.Session.SetString("UserEmail", Email);
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    message = "OTP verified successfully",
+                    redirectUrl = Url.Page("/Dashboard")
+                });
             }
 
             return new JsonResult(new { success = false, message = "Invalid OTP" });

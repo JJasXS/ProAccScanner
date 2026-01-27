@@ -1,9 +1,18 @@
+using System;
 using FirebirdWeb.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// Add session support for simple OTP-based login
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 // Register EmailHelper for dependency injection
 builder.Services.AddSingleton<EmailHelper>();
@@ -21,6 +30,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Enable session before authorization
+app.UseSession();
 
 app.UseAuthorization();
 

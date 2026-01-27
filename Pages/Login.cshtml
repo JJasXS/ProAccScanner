@@ -77,8 +77,12 @@ document.getElementById('verifyBtn').addEventListener('click', async () => {
     document.getElementById('message').innerText = data.message;
 
     if (data.success) {
-        // Optionally, redirect to home page after successful login
-        // window.location.href = '/Index';
+        // Redirect to dashboard after successful OTP verification
+        if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+        } else {
+            window.location.href = '/Dashboard';
+        }
     }
 });
 </script>
