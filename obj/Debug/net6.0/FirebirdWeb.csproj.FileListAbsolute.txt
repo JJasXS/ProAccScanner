@@ -6,7 +6,14 @@ C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\FirebirdWeb.deps.json
 C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\FirebirdWeb.runtimeconfig.json
 C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\FirebirdWeb.dll
 C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\FirebirdWeb.pdb
+C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\BCrypt.Net-Next.dll
 C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\FirebirdSql.Data.FirebirdClient.dll
+C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\System.Data.SqlClient.dll
+C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win-arm64\native\sni.dll
+C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win-x64\native\sni.dll
+C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win-x86\native\sni.dll
+C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\unix\lib\net6.0\System.Data.SqlClient.dll
+C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Data.SqlClient.dll
 C:\Users\sd01\ScannerTest\FirebirdWeb\obj\Debug\net6.0\FirebirdWeb.csproj.AssemblyReference.cache
 C:\Users\sd01\ScannerTest\FirebirdWeb\obj\Debug\net6.0\FirebirdWeb.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\sd01\ScannerTest\FirebirdWeb\obj\Debug\net6.0\FirebirdWeb.AssemblyInfoInputs.cache
@@ -26,10 +33,3 @@ C:\Users\sd01\ScannerTest\FirebirdWeb\obj\Debug\net6.0\refint\FirebirdWeb.dll
 C:\Users\sd01\ScannerTest\FirebirdWeb\obj\Debug\net6.0\FirebirdWeb.pdb
 C:\Users\sd01\ScannerTest\FirebirdWeb\obj\Debug\net6.0\FirebirdWeb.genruntimeconfig.cache
 C:\Users\sd01\ScannerTest\FirebirdWeb\obj\Debug\net6.0\ref\FirebirdWeb.dll
-C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\System.Data.SqlClient.dll
-C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win-arm64\native\sni.dll
-C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win-x64\native\sni.dll
-C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win-x86\native\sni.dll
-C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\unix\lib\net6.0\System.Data.SqlClient.dll
-C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Data.SqlClient.dll
-C:\Users\sd01\ScannerTest\FirebirdWeb\bin\Debug\net6.0\BCrypt.Net-Next.dll

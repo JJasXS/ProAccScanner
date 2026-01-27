@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "IRVgQfDIzzPSKBkZpulvbqf17g8ceQ9qg90jUTL/b8Q=",
+  "Hash": "1XEW9AmpVFe48F+r1K8r+GjSEVihEh9kLoPgDa0B774=",
   "Source": "FirebirdWeb",
   "BasePath": "_content/FirebirdWeb",
   "Mode": "Default",
@@ -49,6 +49,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "C:\\Users\\sd01\\ScannerTest\\FirebirdWeb\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\FirebirdWeb.bundle.scp.css"
+    },
+    {
+      "Identity": "C:\\Users\\sd01\\ScannerTest\\FirebirdWeb\\wwwroot\\css\\login.css",
+      "SourceId": "FirebirdWeb",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\sd01\\ScannerTest\\FirebirdWeb\\wwwroot\\",
+      "BasePath": "_content/FirebirdWeb",
+      "RelativePath": "css/login.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\login.css"
     },
     {
       "Identity": "C:\\Users\\sd01\\ScannerTest\\FirebirdWeb\\wwwroot\\css\\site.css",

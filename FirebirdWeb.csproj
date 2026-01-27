@@ -4,7 +4,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);EmailTest\**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Exclude nested console test projects from the web build -->
+    <Compile Remove="EmailTest\**\*.cs" />
+    <Content Remove="EmailTest\**\*" />
+    <None Remove="EmailTest\**\*" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="10.3.4" />

@@ -4,280 +4,54 @@
     ViewData["Title"] = "Login";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - FirebirdWeb</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<h2>Login with OTP</h2>
 
-        html, body {
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+<div>
+    <label>Email:</label>
+    <input type="email" id="email" />
+    <button id="sendBtn">Send OTP</button>
+</div>
 
-        .login-container {
-            background-color: #fff;
-            padding: 50px 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 400px;
-        }
+<div id="otpGroup" style="display:none; margin-top:10px;">
+    <label>Enter OTP:</label>
+    <input type="text" id="otp" />
+    <button id="verifyBtn">Verify OTP</button>
+</div>
 
-        .login-container h2 {
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 32px;
-            text-align: center;
-        }
+<div id="message" style="margin-top:10px; color:blue;"></div>
 
-        .login-container p {
-            text-align: center;
-            color: #888;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
+<script>
+document.getElementById('sendBtn').addEventListener('click', async () => {
+    const email = document.getElementById('email').value;
+    const formData = new FormData();
+    formData.append('Email', email);
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    const res = await fetch('@Url.Page("Login", "SendOTP")', {
+        method: 'POST',
+        body: formData
+    });
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-        }
+    const data = await res.json();
+    document.getElementById('message').innerText = data.message;
 
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: 0.3s;
-            font-family: inherit;
-        }
+    if (data.success) {
+        document.getElementById('otpGroup').style.display = 'block';
+    }
+});
 
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102,126,234,0.3);
-            outline: none;
-        }
+document.getElementById('verifyBtn').addEventListener('click', async () => {
+    const email = document.getElementById('email').value;
+    const otp = document.getElementById('otp').value;
+    const formData = new FormData();
+    formData.append('Email', email);
+    formData.append('OTP', otp);
 
-        button {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 20px;
-        }
+    const res = await fetch('@Url.Page("Login", "VerifyOTP")', {
+        method: 'POST',
+        body: formData
+    });
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-bottom: 20px;
-            padding: 12px;
-            background: #fadbd8;
-            border-left: 4px solid #e74c3c;
-            border-radius: 4px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-footer a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .form-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .popup-message {
-            position: fixed;
-            top: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #27ae60;
-            color: white;
-            padding: 20px 40px;
-            border-radius: 0 0 8px 8px;
-            font-size: 18px;
-            font-weight: bold;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: none;
-        }
-
-        .popup-message.show {
-            display: block;
-            animation: slideDown 0.5s ease-out forwards;
-        }
-
-        @@keyframes slideDown {
-            0% {
-                top: -100px;
-                opacity: 0;
-            }
-            100% {
-                top: 0;
-                opacity: 1;
-            }
-        }
-
-        @@keyframes slideUp {
-            0% {
-                top: 0;
-                opacity: 1;
-            }
-            100% {
-                top: -100px;
-                opacity: 0;
-            }
-        }
-
-        @@media (max-width: 500px) {
-            .login-container {
-                padding: 30px 20px;
-            }
-
-            .login-container h2 {
-                font-size: 24px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <h2>Welcome Back</h2>
-        <p>Login to your account</p>
-
-        <div id="errorMessage" class="error-message"></div>
-
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="code">User Code:</label>
-                <input type="text" id="code" name="code" required placeholder="Enter your user code" />
-            </div>
-
-            <div class="form-group">
-                <label for="passwd">Password:</label>
-                <input type="password" id="passwd" name="passwd" required placeholder="Enter your password" />
-            </div>
-
-            <button type="submit">Login</button>
-
-            <div class="form-footer">
-                Don't have an account? <a asp-page="/Register">Register here</a>
-            </div>
-        </form>
-    </div>
-
-    <div id="successPopup" class="popup-message">
-        Login Successful!
-    </div>
-
-    <script>
-        // Check if coming from registration
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('registered') === 'true') {
-            const popup = document.getElementById('successPopup');
-            popup.textContent = 'Registration Successful!';
-            popup.classList.add('show');
-
-            // Remove the query parameter from URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-
-            // Hide popup after 2 seconds
-            setTimeout(() => {
-                popup.style.animation = 'slideUp 0.5s ease-out forwards';
-                setTimeout(() => {
-                    popup.classList.remove('show');
-                    popup.style.animation = '';
-                }, 500);
-            }, 2000);
-        }
-
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const code = document.getElementById('code').value;
-            const passwd = document.getElementById('passwd').value;
-            const errorMessage = document.getElementById('errorMessage');
-            
-            errorMessage.classList.remove('show');
-            errorMessage.textContent = '';
-
-            try {
-                const formData = new FormData();
-                formData.append('code', code);
-                formData.append('passwd', passwd);
-
-                const response = await fetch('/api/login/authenticate', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Store user info in session/localStorage
-                    localStorage.setItem('user', JSON.stringify(data.user));
-
-                    // Redirect to dashboard with success parameter
-                    window.location.href = '/Dashboard?loggedIn=true';
-                } else {
-                    // Show error message
-                    errorMessage.textContent = data.error || 'Login failed';
-                    errorMessage.classList.add('show');
-                }
-            } catch (error) {
-                errorMessage.textContent = 'An error occurred: ' + error.message;
-                errorMessage.classList.add('show');
-            }
-        });
-    </script>
-</body>
-</html>
+    const data = await res.json();
+    document.getElementById('message').innerText = data.message;
+});
+</script>
