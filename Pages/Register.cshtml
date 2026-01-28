@@ -268,8 +268,17 @@
                     // Redirect to login with success parameter
                     window.location.href = '/Login?registered=true';
                 } else {
-                    // Show error message
-                    errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">${data.error || 'Registration failed'}</div>`;
+                    // Show detailed error message
+                    let errorMsg = data.error || 'Registration failed';
+                    if (data.details) {
+                        errorMsg += `<br><small style="font-size: 12px; color: #999;">Details: ${data.details}</small>`;
+                    }
+                    if (data.innerException) {
+                        errorMsg += `<br><small style="font-size: 12px; color: #999;">Inner: ${data.innerException}</small>`;
+                    }
+                    errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">${errorMsg}</div>`;
+                    // Also log to console for debugging
+                    console.error('Registration error:', data);
                 }
             } catch (error) {
                 errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">An error occurred: ${error.message}</div>`;

@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllers(); // Add API controllers support
 
 // Add session support for simple OTP-based login
 builder.Services.AddSession(options =>
@@ -16,6 +17,9 @@ builder.Services.AddSession(options =>
 
 // Register EmailHelper for dependency injection
 builder.Services.AddSingleton<EmailHelper>();
+
+// Register DbHelper for dependency injection
+builder.Services.AddSingleton<DbHelper>();
 
 var app = builder.Build();
 
@@ -37,5 +41,6 @@ app.UseSession();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers(); // Map API controllers
 
 app.Run();

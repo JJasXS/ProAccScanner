@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using FirebirdWeb.Helpers;
 
-namespace YourNamespace.Controllers
+namespace FirebirdWeb.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

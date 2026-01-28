@@ -2,63 +2,79 @@ using System;
 using System.Collections.Generic;
 using FirebirdSql.Data.FirebirdClient;
 
-public class DbHelper
+namespace FirebirdWeb.Helpers
 {
-    private readonly string _connectionString;
-
-    // Constructor sets the connection string
-    public DbHelper()
+    public class DbHelper
     {
-        _connectionString = @"User=SYSDBA;Password=masterkey;Database=D:\SQLData\DB\ACC-0002.FDB;DataSource=localhost;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
-    }
+        private readonly string _connectionString;
 
-    // Method to open and return a connection (optional, if needed elsewhere)
-    public FbConnection GetConnection()
-    {
-        var conn = new FbConnection(_connectionString);
-        conn.Open();
-        return conn; // Caller must dispose
-    }
-
-    // Method to execute a SELECT query and return results
-    public List<Dictionary<string, object>> ExecuteSelect(string sql)
-    {
-        var results = new List<Dictionary<string, object>>();
-
-        using (var conn = new FbConnection(_connectionString))
+        // Constructor sets the connection string
+        public DbHelper()
         {
-            conn.Open();
+            _connectionString = @"User=SYSDBA;Password=masterkey;Database=D:\SQLData\DB\ACC-0002.FDB;DataSource=localhost;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
+        }
 
-            using (var cmd = new FbCommand(sql, conn))
+        // Method to open and return a connection (optional, if needed elsewhere)
+        public FbConnection GetConnection()
+        {
+            var conn = new FbConnection(_connectionString);
+            conn.Open();
+            return conn; // Caller must dispose
+        }
+
+        // Method to execute a SELECT query and return results
+        public List<Dictionary<string, object>> ExecuteSelect(string sql)
+        {
+            var results = new List<Dictionary<string, object>>();
+
+            using (var conn = new FbConnection(_connectionString))
             {
-                using (var reader = cmd.ExecuteReader())
+                conn.Open();
+
+                using (var cmd = new FbCommand(sql, conn))
                 {
-                    while (reader.Read())
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        var row = new Dictionary<string, object>();
-                        for (int i = 0; i < reader.FieldCount; i++)
+                        while (reader.Read())
                         {
-                            row[reader.GetName(i)] = reader.GetValue(i);
+                            var row = new Dictionary<string, object>();
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                row[reader.GetName(i)] = reader.GetValue(i);
+                            }
+                            results.Add(row);
                         }
-                        results.Add(row);
                     }
                 }
             }
+
+            return results;
         }
 
-        return results;
-    }
-
-    // Method to execute INSERT, UPDATE, DELETE queries
-    public int ExecuteNonQuery(string sql)
-    {
-        using (var conn = new FbConnection(_connectionString))
+        // Method to execute INSERT, UPDATE, DELETE queries
+        public int ExecuteNonQuery(string sql)
         {
-            conn.Open();
-
-            using (var cmd = new FbCommand(sql, conn))
+            try
             {
-                return cmd.ExecuteNonQuery();
+                Console.WriteLine($"[DB QUERY] Executing: {sql}");
+                using (var conn = new FbConnection(_connectionString))
+                {
+                    conn.Open();
+                    Console.WriteLine("[DB] Connection opened successfully");
+
+                    using (var cmd = new FbCommand(sql, conn))
+                    {
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        Console.WriteLine($"[DB] Query executed successfully. Rows affected: {rowsAffected}");
+                        return rowsAffected;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DB ERROR] Failed to execute query: {sql}");
+                Console.WriteLine($"[DB ERROR] Error: {ex.Message}");
+                throw; // Re-throw to let caller handle it
             }
         }
     }
