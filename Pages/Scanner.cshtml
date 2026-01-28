@@ -7,9 +7,7 @@
 
 <div class="scanner-container">
     <video id="scanner-video" autoplay playsinline style="width:100%; max-height:300px;"></video>
-
     <button id="start-scanner">Start Scanner</button>
-
     <p id="scan-result"></p>
 </div>
 
@@ -33,7 +31,6 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-
     <script>
         const startBtn = document.getElementById('start-scanner');
         const video = document.getElementById('scanner-video');
@@ -48,49 +45,64 @@
         let scannerActive = false;
         let stream = null;
 
+        // Start / Stop scanner
         startBtn.addEventListener('click', async () => {
-    if (!scannerActive) {
-        // Show the video first
-        video.style.display = "block";   // 👈 add this
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" }
+            if (!scannerActive) {
+                video.style.display = "block";
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }
+                });
+                video.srcObject = stream;
+                await video.play();
+
+                Quagga.init({
+                    inputStream: { type: "LiveStream", target: video },
+                    decoder: { readers: ["code_128_reader", "ean_reader"] }
+                }, () => Quagga.start());
+
+                scannerActive = true;
+                startBtn.innerText = "Stop Scanner";
+            } else {
+                stream.getTracks().forEach(t => t.stop());
+                Quagga.stop();
+                scannerActive = false;
+                startBtn.innerText = "Start Scanner";
+                video.style.display = "none";
+            }
         });
 
-        video.srcObject = stream;
-        await video.play();
-
-        Quagga.init({
-            inputStream: {
-                type: "LiveStream",
-                target: video
-            },
-            decoder: {
-                readers: ["code_128_reader", "ean_reader"]
-            }
-        }, () => Quagga.start());
-
-        scannerActive = true;
-        startBtn.innerText = "Stop Scanner";
-    } else {
-        stream.getTracks().forEach(t => t.stop());
-        Quagga.stop();
-        scannerActive = false;
-        startBtn.innerText = "Start Scanner";
-
-        // Hide video again when stopping
-        video.style.display = "none";   // 👈 optional
-    }
-});
-
+        // Barcode detected
         Quagga.onDetected(result => {
-            scanResult.innerText = "Scanned: " + result.codeResult.code;
-            locationInput.value = "Warehouse A";
+            const scannedCode = result.codeResult.code;
+            scanResult.innerText = "Scanned: " + scannedCode;
+            locationInput.value = ""; // leave blank for now
             updateBtn.disabled = true;
             startBtn.click();
+
+            // Send scanned code to server
+            fetch('/Scanner?handler=LogScan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: scannedCode })
+            })
+            .then(res => res.json())
+            .then(data => console.log("Server response:", data));
         });
 
-        yesBtn.onclick = () => updateBtn.disabled = false;
-        noBtn.onclick = () => manualContainer.style.display = "block";
-        manualInput.oninput = () => updateBtn.disabled = !manualInput.value.trim();
+        // ✅ Location confirmation logic
+        yesBtn.onclick = () => {
+            manualContainer.style.display = "none"; // hide manual input
+            updateBtn.disabled = false;              // enable update button
+            manualInput.value = "";                  // clear manual input
+        };
+
+        noBtn.onclick = () => {
+            manualContainer.style.display = "block";       // show manual input
+            updateBtn.disabled = !manualInput.value.trim(); // disable until input is typed
+        };
+
+        manualInput.oninput = () => {
+            updateBtn.disabled = !manualInput.value.trim();
+        };
     </script>
 }

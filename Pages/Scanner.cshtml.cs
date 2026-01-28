@@ -5,27 +5,26 @@ namespace FirebirdWeb.Pages
 {
     public class ScannerModel : PageModel
     {
-        [BindProperty]
-        public string? ScannedLocation { get; set; }
-
-        [BindProperty]
-        public string? ManualLocation { get; set; }
-
+        // Runs when the page loads
         public void OnGet()
         {
-            // Show page
         }
 
-        public IActionResult OnPost()
+        // Handles AJAX POST from JS when a barcode is scanned
+        [IgnoreAntiforgeryToken] // allows JS POST without anti-forgery token
+        public IActionResult OnPostLogScan([FromBody] ScanRequest request)
         {
-            // Determine final location
-            var finalLocation = string.IsNullOrWhiteSpace(ManualLocation) ? ScannedLocation : ManualLocation;
+            // Log scanned barcode in DEBUG format
+            Console.WriteLine($"[DEBUG] Scanned barcode: {request.Code}");
 
-            // TODO: Save scanned code + finalLocation to database
-            // Example: DbHelper.Execute("INSERT INTO ScanTable (Location) VALUES (@0)", finalLocation);
+            // Can later add DB lookup here
+            return new JsonResult(new { success = true });
+        }
 
-            // Redirect back to dashboard after save
-            return RedirectToPage("/Dashboard");
+        // Class to parse JSON sent from JS fetch
+        public class ScanRequest
+        {
+            public string Code { get; set; } = "";
         }
     }
 }
