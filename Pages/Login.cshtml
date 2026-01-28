@@ -4,57 +4,91 @@
     ViewData["Title"] = "Login";
 }
 
-<h2>Login with OTP</h2>
+<link rel="stylesheet" href="~/css/login.css" />
 
-<div>
-    <label>Email:</label>
-    <input type="email" id="email" />
-    <button id="sendBtn">Send OTP</button>
+<div class="login-container">
+    <h2>Login with OTP</h2>
+
+    <!-- Email input group -->
+    <div id="emailGroup">
+        <input type="email" id="email" placeholder="Enter your email" />
+        <button id="sendBtn">Send OTP</button>
+    </div>
+
+    <!-- OTP input group: 6 numeric boxes -->
+    <div id="otpGroup">
+        <div class="otp-boxes">
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
+        </div>
+        <button id="verifyBtn">Verify OTP</button>
+    </div>
+
+    <div id="message"></div>
 </div>
-
-<div id="otpGroup" style="display:none; margin-top:10px;">
-    <label>Enter OTP:</label>
-    <input type="text" id="otp" />
-    <button id="verifyBtn">Verify OTP</button>
-</div>
-
-<div id="message" style="margin-top:10px; color:blue;"></div>
 
 <script>
+// Send OTP
 document.getElementById('sendBtn').addEventListener('click', async () => {
-    const email = document.getElementById('email').value.trim();
+    const emailInput = document.getElementById('email');
+    const email = emailInput.value.trim();
+
     if (!email) {
-        document.getElementById('message').innerText = "Please enter an email.";
+        document.getElementById('message').innerText = "Please enter your email.";
         return;
     }
 
     const formData = new FormData();
     formData.append('Email', email);
 
-    // Corrected URL for Razor Page handler
-    const res = await fetch('@Url.Page("/Login", null, new { handler = "SendOTP" })', {
-        method: 'POST',
-        body: formData
-    });
+    try {
+        const res = await fetch('@Url.Page("/Login", null, new { handler = "SendOTP" })', {
+            method: 'POST',
+            body: formData
+        });
 
-    if (!res.ok) {
+        if (!res.ok) throw new Error("Network error");
+
+        const data = await res.json();
+        document.getElementById('message').innerText = data.message;
+
+        if (data.success) {
+            // Show OTP, hide email
+            document.getElementById('emailGroup').style.display = 'none';
+            document.getElementById('otpGroup').style.display = 'block';
+            document.querySelector('.otp').focus();
+        }
+    } catch (err) {
         document.getElementById('message').innerText = "Error sending OTP.";
-        return;
-    }
-
-    const data = await res.json();
-    document.getElementById('message').innerText = data.message;
-
-    if (data.success) {
-        document.getElementById('otpGroup').style.display = 'block';
     }
 });
 
+// OTP auto-focus and numeric-only
+document.querySelectorAll('.otp').forEach((input, idx, arr) => {
+    input.addEventListener('input', () => {
+        // Allow only digits
+        input.value = input.value.replace(/[^0-9]/g, '');
+        if (input.value && idx < arr.length - 1) arr[idx + 1].focus();
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && idx > 0) {
+            arr[idx - 1].focus();
+        }
+    });
+});
+
+// Verify OTP
 document.getElementById('verifyBtn').addEventListener('click', async () => {
-    const email = document.getElementById('email').value.trim();
-    const otp = document.getElementById('otp').value.trim();
-    if (!email || !otp) {
-        document.getElementById('message').innerText = "Please enter email and OTP.";
+    const email = document.getElementById('emailGroup').querySelector('input')?.value.trim();
+    const otp = Array.from(document.querySelectorAll('.otp')).map(i => i.value).join('');
+
+    if (!email || otp.length < 6) {
+        document.getElementById('message').innerText = "Please enter all 6 OTP digits.";
         return;
     }
 
@@ -62,27 +96,22 @@ document.getElementById('verifyBtn').addEventListener('click', async () => {
     formData.append('Email', email);
     formData.append('OTP', otp);
 
-    // Corrected URL for Razor Page handler
-    const res = await fetch('@Url.Page("/Login", null, new { handler = "VerifyOTP" })', {
-        method: 'POST',
-        body: formData
-    });
+    try {
+        const res = await fetch('@Url.Page("/Login", null, new { handler = "VerifyOTP" })', {
+            method: 'POST',
+            body: formData
+        });
 
-    if (!res.ok) {
-        document.getElementById('message').innerText = "Error verifying OTP.";
-        return;
-    }
+        if (!res.ok) throw new Error("Network error");
 
-    const data = await res.json();
-    document.getElementById('message').innerText = data.message;
+        const data = await res.json();
+        document.getElementById('message').innerText = data.message;
 
-    if (data.success) {
-        // Redirect to dashboard after successful OTP verification
-        if (data.redirectUrl) {
-            window.location.href = data.redirectUrl;
-        } else {
-            window.location.href = '/Dashboard';
+        if (data.success) {
+            window.location.href = data.redirectUrl || '/Dashboard';
         }
+    } catch (err) {
+        document.getElementById('message').innerText = "Error verifying OTP.";
     }
 });
 </script>

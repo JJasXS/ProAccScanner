@@ -1,0 +1,111 @@
+/* Page wrapper */
+.scanner-page {
+    max-width: 480px;
+    margin: 30px auto;
+    padding: 20px;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+/* Title */
+.scanner-page h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Scanner container */
+.scanner-container {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+#scanner-video {
+    width: 100%;                /* Full width of container */
+    max-height: 280px;
+    border-radius: 12px;
+    border: 2px solid #667eea;
+    background: #000;
+    display: none;               /* Hidden initially until start */
+}
+
+/* Buttons */
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#start-scanner {
+    background: #667eea;
+    color: #fff;
+    margin-top: 10px;
+}
+
+#start-scanner:hover {
+    background: #5a67d8;
+}
+
+#scan-result {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Info section */
+.info-section {
+    margin-top: 20px;
+    width: 100%;                  /* Match video width */
+}
+
+.info-section label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.info-section input {
+    width: 100%;                  /* Full width matching video */
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;       /* Ensure padding doesn't break width */
+}
+
+/* Yes / No buttons */
+#location-confirm {
+    margin-bottom: 15px;
+}
+
+#yes-btn {
+    background: #28a745;
+    color: white;
+    margin-right: 10px;
+}
+
+#no-btn {
+    background: #dc3545;
+    color: white;
+}
+
+/* Manual location */
+#manual-location-container {
+    margin-top: 10px;
+}
+
+/* Update button */
+#update-btn {
+    width: 100%;                  /* Full width like camera */
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+}
+
+#update-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}

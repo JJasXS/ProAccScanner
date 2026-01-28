@@ -1,152 +1,48 @@
 @page
 @model FirebirdWeb.Pages.DashboardModel
-@{
-    ViewData["Title"] = "Dashboard";
-}
+
+
+<link rel="stylesheet" href="~/css/dashboard.css" />
+
 
 <div class="dashboard-page">
-    <h2>Dashboard</h2>
+<h2 class="dashboard-header">Dashboard</h2>
 
-    <div class="dashboard-cards">
-        <!-- Scanner Card -->
-        <div class="card" onclick="location.href='@Url.Page("/Scanner")'">
-            <h3>Scanner</h3>
-            <p>Click here to go to the Scan page</p>
-        </div>
-    </div>
+
+<div class="dashboard-cards">
+<!-- Scanner Card -->
+<div class="card" onclick="location.href='@Url.Page("/Scanner")'">
+<h3>Scanner</h3>
+<p>Click here to go to the Scan page</p>
 </div>
+</div>
+</div>
+
 
 <div id="successPopup" class="popup-message">
-    Login Successful!
+Login Successful!
 </div>
 
-<style>
-/* Dashboard page styling */
-.dashboard-page {
-    padding: 20px;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.dashboard-page h2 {
-    margin-bottom: 25px;
-    color: #333;
-    font-size: 32px;
-}
-
-/* Cards container */
-.dashboard-cards {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Individual card */
-.card {
-    background-color: #667eea;
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    width: 220px;
-    height: 130px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: 0.3s;
-    text-align: center;
-}
-
-.card h3 {
-    margin-bottom: 10px;
-}
-
-.card p {
-    font-size: 14px;
-}
-
-/* Hover effect */
-.card:hover {
-    background-color: #5a67d8;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-}
-
-/* Responsive for smaller screens */
-@@media (max-width: 600px) {
-    .dashboard-cards {
-        flex-direction: column;
-        align-items: center;
-    }
-}
-
-/* Popup message styling */
-.popup-message {
-    position: fixed;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #27ae60;
-    color: white;
-    padding: 20px 40px;
-    border-radius: 0 0 8px 8px;
-    font-size: 18px;
-    font-weight: bold;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    z-index: 1000;
-    display: none;
-}
-
-.popup-message.show {
-    display: block;
-    animation: slideDown 0.5s ease-out forwards;
-}
-
-@@keyframes slideDown {
-    0% {
-        top: -100px;
-        opacity: 0;
-    }
-    100% {
-        top: 0;
-        opacity: 1;
-    }
-}
-
-@@keyframes slideUp {
-    0% {
-        top: 0;
-        opacity: 1;
-    }
-    100% {
-        top: -100px;
-        opacity: 0;
-    }
-}
-</style>
 
 <script>
-    // Check if coming from login
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('loggedIn') === 'true') {
-        const popup = document.getElementById('successPopup');
-        popup.classList.add('show');
+// Show popup if coming from login
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('loggedIn') === 'true') {
+const popup = document.getElementById('successPopup');
+popup.classList.add('show');
 
-        // Remove the query parameter from URL
-        window.history.replaceState({}, document.title, window.location.pathname);
 
-        // Hide popup after 2 seconds
-        setTimeout(() => {
-            popup.style.animation = 'slideUp 0.5s ease-out forwards';
-            setTimeout(() => {
-                popup.classList.remove('show');
-                popup.style.animation = '';
-            }, 500);
-        }, 2000);
-    }
+// Remove query param from URL
+window.history.replaceState({}, document.title, window.location.pathname);
+
+
+// Hide popup after 2 seconds
+setTimeout(() => {
+popup.style.animation = 'slideUp 0.5s ease-out forwards';
+setTimeout(() => {
+popup.classList.remove('show');
+popup.style.animation = '';
+}, 500);
+}, 2000);
+}
 </script>
