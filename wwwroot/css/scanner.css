@@ -66,20 +66,46 @@ html, body {
   background: linear-gradient(90deg, #2563eb, #10b981);
 }
 
+/* ✅ Scanning screen (camera preview) smaller */
 .video-wrap{
   position: relative;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #e5e7eb;
   background: #0b1220;
-  min-height: 220px;
+
+  /* ✅ smaller height */
+  height: 200px;
+  min-height: 200px;
+
+  /* ✅ smaller width (centered) */
+  max-width: 520px;
+  margin: 0 auto;
 }
 
+/* ✅ Video fills the fixed box */
 #scanner-video{
   width: 100%;
-  max-height: 320px;
+  height: 100%;
   display: none; /* default hidden until start */
   object-fit: cover;
+}
+
+/* ✅ Quagga injects canvas/overlay — force overlay so it won't expand layout */
+.video-wrap canvas,
+.video-wrap video,
+.video-wrap .drawingBuffer,
+.video-wrap .viewport{
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.video-wrap canvas,
+.video-wrap .drawingBuffer{
+  pointer-events: none;
 }
 
 .video-hint{
@@ -207,5 +233,12 @@ input:focus, select:focus{
 @media (max-width: 900px){
   .scanner-grid{
     grid-template-columns: 1fr;
+  }
+
+  /* ✅ smaller camera box on mobile */
+  .video-wrap{
+    max-width: 100%;
+    height: 170px;
+    min-height: 170px;
   }
 }

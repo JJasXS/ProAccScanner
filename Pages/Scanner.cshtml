@@ -4,7 +4,7 @@
     ViewData["Title"] = "Scanner";
 }
 
- <link rel="stylesheet" href="~/css/scanner.css" />-->
+<link rel="stylesheet" href="~/css/scanner.css" />
 
 <div class="scanner-page">
     <div class="scanner-header">
@@ -16,14 +16,12 @@
         <!-- Left: Camera / scan -->
         <div class="scan-card">
             <div class="scan-top">
-                
-
                 <button id="start-scanner" class="btn btn-primary" type="button">
                     Start Scanner
                 </button>
             </div>
 
-            <div class="video-wrap">
+            <div class="video-wrap" id="video-wrap">
                 <video id="scanner-video" autoplay playsinline></video>
                 <div class="video-hint">Point camera at barcode</div>
             </div>
@@ -63,124 +61,194 @@
     </div>
 </div>
 
-@section Scripts {
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-<script>
-const startBtn = document.getElementById('start-scanner');
-const video = document.getElementById('scanner-video');
-const scanResult = document.getElementById('scan-result');
-const locationInput = document.getElementById('location');
-const yesBtn = document.getElementById('yes-btn');
-const noBtn = document.getElementById('no-btn');
-const manualContainer = document.getElementById('manual-location-container');
-const manualInput = document.getElementById('manual-location');
-const updateBtn = document.getElementById('update-btn');
+@section Scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 
-let scannerActive = false;
-let stream = null;
+    <script>
+        const startBtn = document.getElementById('start-scanner');
+        const video = document.getElementById('scanner-video');
+        const videoWrap = document.getElementById('video-wrap');
+        const scanResult = document.getElementById('scan-result');
+        const locationInput = document.getElementById('location');
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+        const manualContainer = document.getElementById('manual-location-container');
+        const manualInput = document.getElementById('manual-location');
+        const updateBtn = document.getElementById('update-btn');
 
-// Start / Stop scanner
-startBtn.addEventListener('click', async () => {
-    if (!scannerActive) {
-        video.style.display = "block";
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        video.srcObject = stream;
-        await video.play();
+        const remark1Input = document.getElementById('remark1');
+        const remark2Input = document.getElementById('remark2');
+        const remark3Input = document.getElementById('remark3');
 
-        Quagga.init({
-            inputStream: { type: "LiveStream", target: video },
-            decoder: { readers: ["code_128_reader", "ean_reader"] }
-        }, () => Quagga.start());
+        let scannerActive = false;
+        let stream = null;
 
-        scannerActive = true;
-        startBtn.innerText = "Stop Scanner";
-    } else {
-        stream.getTracks().forEach(t => t.stop());
-        Quagga.stop();
-        scannerActive = false;
-        startBtn.innerText = "Start Scanner";
-        video.style.display = "none";
-    }
-});
+        // ✅ store scanned code for update
+        let lastScannedCode = "";
+        let lastDetectedAt = 0;
 
-// Barcode detected
-Quagga.onDetected(result => {
-    const scannedCode = result.codeResult.code;
-    scanResult.innerText = "Scanned: " + scannedCode;
-    locationInput.value = "";
-    updateBtn.disabled = true;
-    startBtn.click(); // stop scanner
-
-    fetch('/api/scanner/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: scannedCode })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (!data.success) {
-            alert("Error: " + data.message);
-            return;
-        }
-
-        if (data.exists) {
-            if (data.location && data.location.trim() !== "") {
-                locationInput.value = data.location;
-            } else {
-                locationInput.value = "";
+        function stopScanner() {
+            try { Quagga.stop(); } catch (e) { }
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+                stream = null;
             }
-            manualContainer.style.display = "none";
-            updateBtn.disabled = true;
-        } else {
-            locationInput.value = "";
-            manualContainer.style.display = "none";
-            updateBtn.disabled = true;
+            scannerActive = false;
+            startBtn.innerText = "Start Scanner";
+            video.style.display = "none";
         }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Error validating code! Check console for details.");
-    });
-});
 
-// Manual confirmation logic
-yesBtn.onclick = () => {
-    manualContainer.style.display = "none";
-    updateBtn.disabled = false;
-    manualInput.value = "";
-};
+        startBtn.addEventListener('click', async () => {
+            if (!scannerActive) {
+                video.style.display = "block";
 
-noBtn.onclick = () => {
-    manualContainer.style.display = "block";
-    updateBtn.disabled = true;
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = stream;
+                await video.play();
 
-    fetch('/api/scanner/locations')
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && Array.isArray(data.locations)) {
-                manualInput.innerHTML = '';
-
-                const placeholder = document.createElement('option');
-                placeholder.value = '';
-                placeholder.text = '-- Select Location --';
-                manualInput.appendChild(placeholder);
-
-                data.locations.forEach(loc => {
-                    const opt = document.createElement('option');
-                    opt.value = loc;
-                    opt.text = loc;
-                    manualInput.appendChild(opt);
+                Quagga.init({
+                    inputStream: { type: "LiveStream", target: videoWrap },
+                    decoder: { readers: ["code_128_reader", "ean_reader"] }
+                }, (err) => {
+                    if (err) {
+                        console.error(err);
+                        alert("Failed to start scanner.");
+                        stopScanner();
+                        return;
+                    }
+                    Quagga.start();
+                    scannerActive = true;
+                    startBtn.innerText = "Stop Scanner";
                 });
 
-                manualInput.onchange = () => {
-                    updateBtn.disabled = manualInput.value === '';
-                };
+            } else {
+                stopScanner();
             }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Failed to load locations!");
         });
-};
-</script>
+
+        Quagga.onDetected(result => {
+            const now = Date.now();
+            if (now - lastDetectedAt < 1200) return; // throttle
+            lastDetectedAt = now;
+
+            const scannedCode = result?.codeResult?.code || "";
+            if (!scannedCode) return;
+
+            lastScannedCode = scannedCode;
+
+            scanResult.innerText = "Scanned: " + scannedCode;
+            locationInput.value = "";
+            updateBtn.disabled = true;
+
+            stopScanner();
+
+            fetch('/api/scanner/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: scannedCode })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    alert("Error: " + (data.message || "Unknown error"));
+                    return;
+                }
+
+                if (data.exists) {
+                    locationInput.value = (data.location || "").trim();
+                    manualContainer.style.display = "none";
+                    updateBtn.disabled = true; // must confirm yes/no
+                } else {
+                    locationInput.value = "";
+                    manualContainer.style.display = "none";
+                    updateBtn.disabled = true;
+                    alert(data.message || "Code not found.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error validating code! Check console.");
+            });
+        });
+
+        yesBtn.onclick = () => {
+            manualContainer.style.display = "none";
+            manualInput.value = "";
+            updateBtn.disabled = !lastScannedCode;
+        };
+
+        noBtn.onclick = () => {
+            manualContainer.style.display = "block";
+            updateBtn.disabled = true;
+
+            fetch('/api/scanner/locations')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && Array.isArray(data.locations)) {
+                        manualInput.innerHTML = '';
+
+                        const placeholder = document.createElement('option');
+                        placeholder.value = '';
+                        placeholder.text = '-- Select Location --';
+                        manualInput.appendChild(placeholder);
+
+                        data.locations.forEach(loc => {
+                            const opt = document.createElement('option');
+                            opt.value = loc;
+                            opt.text = loc;
+                            manualInput.appendChild(opt);
+                        });
+
+                        manualInput.onchange = () => {
+                            updateBtn.disabled = (manualInput.value === '') || !lastScannedCode;
+                        };
+                    } else {
+                        alert("Failed to load locations.");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Failed to load locations!");
+                });
+        };
+
+        // ✅ Update -> insert new record
+        updateBtn.addEventListener('click', () => {
+            if (!lastScannedCode) {
+                alert("No scanned code.");
+                return;
+            }
+
+            const chosenLocation =
+                (manualContainer.style.display === "block" && manualInput.value)
+                    ? manualInput.value
+                    : (locationInput.value || "");
+
+            fetch('/api/scanner/insert-detail', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: lastScannedCode,
+                    locationDesc: chosenLocation,
+                    remark1: remark1Input.value || "",
+                    remark2: remark2Input.value || "",
+                    remark3: remark3Input.value || ""
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    alert("Insert failed: " + (data.message || "Unknown error"));
+                    return;
+                }
+                alert("Inserted successfully!");
+                updateBtn.disabled = true;
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Insert failed! Check console.");
+            });
+        });
+    </script>
 }
