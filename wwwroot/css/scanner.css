@@ -242,3 +242,14 @@ input:focus, select:focus{
     min-height: 170px;
   }
 }
+
+
+/* Back button under Update */
+.btn-back-dashboard{
+  display: block;          /* take full row so it can center */
+  width: fit-content;      /* button wraps content nicely */
+  margin: 12px auto 0;     /* top spacing + centered */
+  padding: 10px 16px;      /* comfy */
+  border-radius: 10px;     /* match modern UI */
+  text-align: center;
+}

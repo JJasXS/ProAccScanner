@@ -129,13 +129,21 @@ ORDER BY DESCRIPTION
         // 3) INSERT NEW record into ST_ITEM_TPLDTL
         // ✅ ITEMCODE = CODE
         // ✅ UDF_DATETIME = current system datetime (string)
-        //
-        // Note: Your UDF_DATETIME column is VARCHAR(200),
-        // so we store a formatted datetime string: yyyy-MM-dd HH:mm:ss
+        // ✅ UDF_USER = session user (SY_USER.NAME)
         // ----------------------------
         [HttpPost("insert-detail")]
         public IActionResult InsertDetail([FromBody] InsertDetailRequest request)
         {
+            // ✅ Require login session
+            var sessionEmail = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrWhiteSpace(sessionEmail))
+                return Unauthorized(new { success = false, message = "Not logged in." });
+
+            // ✅ Prefer UserName, fallback to Email
+            var sessionUser = (HttpContext.Session.GetString("UserName") ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(sessionUser))
+                sessionUser = sessionEmail.Trim();
+
             if (request == null || string.IsNullOrWhiteSpace(request.Code))
             {
                 return BadRequest(new { success = false, message = "Code is required." });
@@ -184,14 +192,16 @@ WHERE UPPER(TRIM(DESCRIPTION)) = UPPER('{safeLocDesc}')
                 string safeRemark3 = EscapeSQL(remark3);
 
                 // 3) Current system datetime (server time)
-                // Stored into VARCHAR column UDF_DATETIME
                 string nowStr = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 string safeNowStr = EscapeSQL(nowStr);
 
-                // 4) Insert new row (DTLKEY NOT NULL)
+                // 4) Session user -> UDF_USER
+                string safeUser = EscapeSQL(sessionUser);
+
+                // 5) Insert new row (DTLKEY NOT NULL)
                 string insertSql = $@"
 INSERT INTO ST_ITEM_TPLDTL
-    (DTLKEY, CODE, ITEMCODE, LOCATION, REMARK1, REMARK2, UDF_REMARK3, UDF_DATETIME)
+    (DTLKEY, CODE, ITEMCODE, LOCATION, REMARK1, REMARK2, UDF_REMARK3, UDF_DATETIME, UDF_USER)
 VALUES
     (
       (SELECT COALESCE(MAX(DTLKEY), 0) + 1 FROM ST_ITEM_TPLDTL),
@@ -201,7 +211,8 @@ VALUES
       '{safeRemark1}',
       '{safeRemark2}',
       '{safeRemark3}',
-      '{safeNowStr}'
+      '{safeNowStr}',
+      '{safeUser}'
     )
 ";
 

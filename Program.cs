@@ -7,13 +7,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddControllers(); // Add API controllers support
 
+// ✅ REQUIRED: Session needs a cache store
+builder.Services.AddDistributedMemoryCache();
+
 // Add session support for simple OTP-based login
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+
+    // Optional (enable when HTTPS is always used)
+    // options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
+
 
 // Register EmailHelper for dependency injection
 builder.Services.AddSingleton<EmailHelper>();
@@ -35,7 +42,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Enable session before authorization
+// ✅ Enable session before authorization/endpoints
 app.UseSession();
 
 app.UseAuthorization();

@@ -9,23 +9,22 @@
 <div class="scanner-page">
     <div class="scanner-header">
         <h2>Scanner</h2>
-        <p>Scan barcode, confirm location, add remarks, then update.</p>
     </div>
 
     <div class="scanner-grid">
         <!-- Left: Camera / scan -->
         <div class="scan-card">
-            <div class="scan-top">
-                <button id="start-scanner" class="btn btn-primary" type="button">
-                    Start Scanner
-                </button>
-            </div>
+            
 
             <div class="video-wrap" id="video-wrap">
                 <video id="scanner-video" autoplay playsinline></video>
                 <div class="video-hint">Point camera at barcode</div>
             </div>
-
+<div class="scan-top">
+                <button id="start-scanner" class="btn btn-primary" type="button">
+                    Start Scanner
+                </button>
+            </div>
             <p id="scan-result" class="scan-result"></p>
         </div>
 
@@ -57,7 +56,13 @@
             </div>
 
             <button id="update-btn" class="btn btn-success" disabled>Update</button>
-        </div>
+
+<a href="/" class="btn btn-outline" style="margin-top:10px; display:inline-block;">
+    ← Back to Dashboard
+</a>
+
+
+                </div>
     </div>
 </div>
 
@@ -156,10 +161,19 @@
                 }
 
                 if (data.exists) {
-                    locationInput.value = (data.location || "").trim();
-                    manualContainer.style.display = "none";
-                    updateBtn.disabled = true; // must confirm yes/no
-                } else {
+    locationInput.value = (data.location || "").trim();
+
+    // ✅ Auto-confirm YES by default
+    manualContainer.style.display = "none";
+    manualInput.value = "";
+
+    // ✅ Enable Update immediately (not faded)
+    updateBtn.disabled = !lastScannedCode;
+
+    // (optional) scroll to remarks/update area
+    // updateBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+} else {
+
                     locationInput.value = "";
                     manualContainer.style.display = "none";
                     updateBtn.disabled = true;

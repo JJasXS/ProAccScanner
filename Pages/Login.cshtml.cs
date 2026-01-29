@@ -45,6 +45,31 @@ namespace FirebirdWeb.Pages
             }
         }
 
+        // ✅ NEW: get SY_USER.NAME by email
+        private string GetSyUserName(string email)
+        {
+            try
+            {
+                using var con = _db.GetConnection();
+
+                const string sql = @"
+                    SELECT FIRST 1 NAME
+                    FROM SY_USER
+                    WHERE UPPER(EMAIL) = UPPER(@Email)
+                ";
+
+                using var cmd = new FbCommand(sql, con);
+                cmd.Parameters.AddWithValue("@Email", (email ?? "").Trim());
+
+                return cmd.ExecuteScalar()?.ToString()?.Trim() ?? "";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[DB ERROR] GetSyUserName: " + ex.Message);
+                return "";
+            }
+        }
+
         public JsonResult OnPostSendOTP()
         {
             Email = (Email ?? "").Trim();
@@ -103,7 +128,11 @@ namespace FirebirdWeb.Pages
 
             if (isValid)
             {
+                // ✅ Load Name from SY_USER and store into Session
+                var userName = GetSyUserName(Email);
+
                 HttpContext.Session.SetString("UserEmail", Email);
+                HttpContext.Session.SetString("UserName", userName);
 
                 return new JsonResult(new
                 {
