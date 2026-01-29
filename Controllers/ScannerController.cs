@@ -19,7 +19,10 @@ namespace FirebirdWeb.Controllers
 
         // ----------------------------
         // 1️⃣ Validate scanned code
-        // Flow: scannedCode -> ST_ITEM_TPL.CODE -> ST_ITEM_TPLDTL.CODE -> get LOCATION
+        // Flow:
+        // scannedCode -> ST_ITEM_TPLDTL.CODE
+        // ST_ITEM_TPLDTL.LOCATION (location code)
+        // -> ST_LOCATION.CODE -> return ST_LOCATION.DESCRIPTION (full name)
         // ----------------------------
         [HttpPost("validate")]
         public IActionResult Validate([FromBody] ScannerRequest request)
@@ -34,24 +37,23 @@ namespace FirebirdWeb.Controllers
                 });
             }
 
-            // Keep your existing normalization
             string code = request.Code.Trim().ToUpper();
 
             try
             {
-                // ✅ FIXED:
-                // - Filter only once using D.CODE (most common place for detail rows)
-                // - Join on TRIM(T.CODE)=TRIM(D.CODE) (no redundant UPPER comparison on join)
-                // - Use TRIM() for Firebird
-                // - Avoid returning "No location assigned" string; return "" so UI handles it
                 string safeCode = EscapeSQL(code);
 
+                // ✅ NEW: join to ST_LOCATION to show DESCRIPTION instead of code
+                // - D.LOCATION == L.CODE (as you explained)
+                // - If location is missing / not found, return empty string (UI handles it)
                 string sql = $@"
 SELECT FIRST 1
-    TRIM(D.LOCATION) AS LOCATION
+    TRIM(COALESCE(L.DESCRIPTION, '')) AS LOCATION
 FROM ST_ITEM_TPLDTL D
 JOIN ST_ITEM_TPL T
     ON TRIM(T.CODE) = TRIM(D.CODE)
+LEFT JOIN ST_LOCATION L
+    ON UPPER(TRIM(L.CODE)) = UPPER(TRIM(D.LOCATION))
 WHERE UPPER(TRIM(D.CODE)) = '{safeCode}'
 ";
 
@@ -63,20 +65,17 @@ WHERE UPPER(TRIM(D.CODE)) = '{safeCode}'
 
                     if (results[0].ContainsKey("LOCATION") && results[0]["LOCATION"] != null)
                     {
-                        location = results[0]["LOCATION"].ToString();
-                        location = location == null ? "" : location.Trim();
+                        location = results[0]["LOCATION"].ToString()?.Trim() ?? "";
                     }
 
-                    // If location is null/empty, return empty string (frontend already handles this)
                     return Ok(new
                     {
                         success = true,
                         exists = true,
-                        location = location ?? ""
+                        location
                     });
                 }
 
-                // Code not found
                 return Ok(new
                 {
                     success = true,
@@ -97,8 +96,7 @@ WHERE UPPER(TRIM(D.CODE)) = '{safeCode}'
         }
 
         // ----------------------------
-        // 2️⃣ Get all existing locations (for manual selection dropdown)
-        // Frontend calls: GET /api/scanner/locations
+        // 2️⃣ Get all existing locations (manual selection dropdown)
         // ----------------------------
         [HttpGet("locations")]
         public IActionResult GetLocations()
@@ -134,9 +132,6 @@ ORDER BY DESCRIPTION
             }
         }
 
-        // ----------------------------
-        // Helper: escape single quotes to prevent SQL errors
-        // ----------------------------
         private string EscapeSQL(string value)
         {
             return string.IsNullOrEmpty(value) ? "" : value.Replace("'", "''");
