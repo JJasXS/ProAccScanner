@@ -19,12 +19,12 @@
 }
 
 #scanner-video {
-    width: 100%;                /* Full width of container */
+    width: 100%;                
     max-height: 280px;
     border-radius: 12px;
     border: 2px solid #667eea;
     background: #000;
-    display: none;               /* Hidden initially until start */
+    display: none;               
 }
 
 /* Buttons */
@@ -55,7 +55,7 @@ button {
 /* Info section */
 .info-section {
     margin-top: 20px;
-    width: 100%;                  /* Match video width */
+    width: 100%;                  
 }
 
 .info-section label {
@@ -64,13 +64,49 @@ button {
     font-weight: 600;
 }
 
-.info-section input {
-    width: 100%;                  /* Full width matching video */
+/* Inputs and Select (text box + dropdown) */
+.info-section input,
+.info-section select {
+    width: 100%;                   /* Full width */
     padding: 10px;
     margin-bottom: 15px;
     border-radius: 8px;
     border: 1px solid #ccc;
-    box-sizing: border-box;       /* Ensure padding doesn't break width */
+    box-sizing: border-box;       
+    font-size: 1rem;
+    color: #333;
+    background: #fff;
+    line-height: 1.5;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+
+    /* Remove default browser styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Ensure space for dropdown arrow */
+    padding-right: 40px;
+}
+
+/* Dropdown arrow styling */
+.info-section select {
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='12' height='7' viewBox='0 0 12 7' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 7L0 0h12L6 7z' fill='%23333'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px 7px;
+    cursor: pointer;
+}
+
+/* Dropdown options padding */
+.info-section select option {
+    padding: 8px 10px;
+}
+
+/* Focus state for input & select */
+.info-section input:focus,
+.info-section select:focus {
+    border-color: #667eea;
+    outline: none;
 }
 
 /* Yes / No buttons */
@@ -89,14 +125,14 @@ button {
     color: white;
 }
 
-/* Manual location */
+/* Manual location container */
 #manual-location-container {
     margin-top: 10px;
 }
 
 /* Update button */
 #update-btn {
-    width: 100%;                  /* Full width like camera */
+    width: 100%;                  
     background: #007bff;
     color: white;
     padding: 10px;

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest\\EmailTest.csproj": {}
+    "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest\\EmailTest.csproj": {
+    "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest\\EmailTest.csproj",
+        "projectUniqueName": "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest.csproj",
         "projectName": "EmailTest",
-        "projectPath": "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest\\EmailTest.csproj",
+        "projectPath": "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest.csproj",
         "packagesPath": "C:\\Users\\sd01\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest\\obj\\",
+        "outputPath": "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sd01\\AppData\\Roaming\\NuGet\\NuGet.Config"
