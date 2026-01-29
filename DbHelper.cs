@@ -11,8 +11,15 @@ namespace FirebirdWeb.Helpers
         // Constructor sets the connection string
         public DbHelper()
         {
-       // _connectionString = @"User=SYSDBA;Password=masterkey;Database=D:\SQLData\DB\ACC-ProAcc202601.FDB;DataSource=localhost;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
+        
+        //Dbeaver connect for testing (no lcoation data)
+        //_connectionString = @"User=SYSDBA;Password=masterkey;Database=D:\SQLData\DB\ACC-ProAcc202601.FDB;DataSource=localhost;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
+        
+        //SQL's connection (got locaiton data)
         _connectionString = @"User=SYSDBA;Password=masterkey;Database=localhost:C:\eStream\SQLAccounting\DB\ACC-PROACC202601.FDB;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
+        
+        
+        
         //_connectionString = @"User=ADMIN;Password=Jus@230526H;Database=C:\eStream\SQLAccounting\DB\ACC-PROACC202601.FDB;DataSource=localhost;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
         }
 

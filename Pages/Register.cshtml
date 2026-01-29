@@ -1,289 +1,69 @@
 @page
 @model FirebirdWeb.Pages.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register - FirebirdWeb</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<link rel="stylesheet" href="~/css/register.css" />
 
-        html, body {
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+<div class="register-container">
+    <h2>Create Account</h2>
+    <p>Fill in your details to register.</p>
 
-        .register-container {
-            background-color: #fff;
-            padding: 50px 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .register-container h2 {
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 32px;
-            text-align: center;
-        }
-
-        .register-container p {
-            text-align: center;
-            color: #888;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="tel"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: 0.3s;
-            font-family: inherit;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus,
-        input[type="tel"]:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102,126,234,0.3);
-            outline: none;
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 20px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
-            display: block;
-        }
-
-        .success-message {
-            color: #27ae60;
-            font-size: 14px;
-            margin-bottom: 20px;
-            padding: 12px;
-            background: #d4edda;
-            border-left: 4px solid #27ae60;
-            border-radius: 4px;
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-footer a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .form-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .popup-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #27ae60;
-            color: white;
-            padding: 30px 50px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-            z-index: 1000;
-            display: none;
-            animation: popupFadeOut 1s ease-in-out forwards;
-        }
-
-        .popup-message.show {
-            display: block;
-        }
-
-        @@keyframes popupFadeOut {
-            0% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.8);
-            }
-        }
-
-        @@media (max-width: 500px) {
-            .register-container {
-                padding: 30px 20px;
-            }
-
-            .register-container h2 {
-                font-size: 24px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="register-container">
-        <h2>Create Account</h2>
-        <p>Join us today and get started</p>
-
-        <div id="errorContainer"></div>
-
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="code">User Code:</label>
-                <input type="text" id="code" name="code" required placeholder="e.g., USER001" />
-            </div>
-
-            <div class="form-group">
-                <label for="name">Full Name:</label>
-                <input type="text" id="name" name="name" required placeholder="Enter your full name" />
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address:</label>
-                <input type="email" id="email" name="email" required placeholder="your.email@example.com" />
-            </div>
-
-            <div class="form-group">
-                <label for="mobile">Mobile Number:</label>
-                <input type="tel" id="mobile" name="mobile" placeholder="+1 (555) 123-4567" />
-            </div>
-
-            <div class="form-group">
-                <label for="passwd">Password:</label>
-                <input type="password" id="passwd" name="passwd" required placeholder="At least 6 characters" />
-            </div>
-
-            <div class="form-group">
-                <label for="passwdConfirm">Confirm Password:</label>
-                <input type="password" id="passwdConfirm" name="passwdConfirm" required placeholder="Confirm your password" />
-            </div>
-
-            <button type="submit">Register</button>
-
-            <div class="form-footer">
-                Already have an account? <a asp-page="/Login">Login here</a>
-            </div>
-        </form>
+    <div class="top-row">
+        <a class="back-link" asp-page="/Index">← Back</a>
     </div>
 
-    <div id="successPopup" class="popup-message">
-        Registration Successful!
-    </div>
+    <div id="errorContainer"></div>
 
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    <form id="registerForm" novalidate>
+        <input type="text" id="code" name="code" required placeholder="User Code (e.g. USER001)" autocomplete="off" />
+        <input type="text" id="name" name="name" required placeholder="Full Name" autocomplete="name" />
+        <input type="email" id="email" name="email" required placeholder="Email Address" autocomplete="email" />
+        <input type="tel" id="mobile" name="mobile" placeholder="Mobile Number" autocomplete="tel" />
 
-            const passwd = document.getElementById('passwd').value;
-            const passwdConfirm = document.getElementById('passwdConfirm').value;
-            const errorContainer = document.getElementById('errorContainer');
-            errorContainer.innerHTML = '';
+        <input type="password" id="passwd" name="passwd" required placeholder="Password (min 6 chars)" autocomplete="new-password" />
+        <input type="password" id="passwdConfirm" name="passwdConfirm" required placeholder="Confirm Password" autocomplete="new-password" />
 
-            // Validate passwords match
-            if (passwd !== passwdConfirm) {
-                errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">Passwords do not match</div>`;
-                return;
-            }
+        <button type="submit" id="registerBtn">Register</button>
 
-            // Validate password length
-            if (passwd.length < 6) {
-                errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">Password must be at least 6 characters</div>`;
-                return;
-            }
+        <a class="login-link" asp-page="/Login">Already have an account? Login</a>
+    </form>
+</div>
 
-            const formData = new FormData(this);
-            // Remove the confirm password field before sending (server only needs passwd)
-            formData.delete('passwdConfirm');
+<script>
+document.getElementById('registerForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-            try {
-                const response = await fetch('/api/registration/register', {
-                    method: 'POST',
-                    body: formData
-                });
+    const passwd = document.getElementById('passwd').value;
+    const passwdConfirm = document.getElementById('passwdConfirm').value;
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.innerHTML = '';
 
-                const data = await response.json();
+    if (passwd !== passwdConfirm) {
+        errorContainer.innerHTML = `<div class="alert">Passwords do not match</div>`;
+        return;
+    }
+    if (passwd.length < 6) {
+        errorContainer.innerHTML = `<div class="alert">Password must be at least 6 characters</div>`;
+        return;
+    }
 
-                if (data.success) {
-                    // Redirect to login with success parameter
-                    window.location.href = '/Login?registered=true';
-                } else {
-                    // Show detailed error message
-                    let errorMsg = data.error || 'Registration failed';
-                    if (data.details) {
-                        errorMsg += `<br><small style="font-size: 12px; color: #999;">Details: ${data.details}</small>`;
-                    }
-                    if (data.innerException) {
-                        errorMsg += `<br><small style="font-size: 12px; color: #999;">Inner: ${data.innerException}</small>`;
-                    }
-                    errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">${errorMsg}</div>`;
-                    // Also log to console for debugging
-                    console.error('Registration error:', data);
-                }
-            } catch (error) {
-                errorContainer.innerHTML = `<div class="error-message" style="margin-bottom: 20px; padding: 12px; background: #fadbd8; border-left: 4px solid #e74c3c; border-radius: 4px;">An error occurred: ${error.message}</div>`;
-            }
-        });
-    </script>
-</body>
-</html>
+    const formData = new FormData(this);
+    formData.delete('passwdConfirm');
+
+    try {
+        const res = await fetch('/api/registration/register', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error("Network error");
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.href = '/Login?registered=true';
+        } else {
+            errorContainer.innerHTML = `<div class="alert">${data.error || 'Registration failed'}</div>`;
+        }
+    } catch (err) {
+        errorContainer.innerHTML = `<div class="alert">Error registering. Please try again.</div>`;
+    }
+});
+</script>

@@ -4,32 +4,63 @@
     ViewData["Title"] = "Scanner";
 }
 
-<link rel="stylesheet" href="~/css/scanner.css" />
+ <link rel="stylesheet" href="~/css/scanner.css" />-->
 
-<h2>Scanner</h2>
-
-<div class="scanner-container">
-    <video id="scanner-video" autoplay playsinline style="width:100%; max-height:300px;"></video>
-    <button id="start-scanner">Start Scanner</button>
-    <p id="scan-result"></p>
-</div>
-
-<div class="info-section">
-    <label>Scanned Location</label>
-    <input type="text" id="location" readonly />
-
-    <div id="location-confirm">
-        <p>Is this location correct?</p>
-        <button type="button" id="yes-btn">Yes</button>
-        <button type="button" id="no-btn">No</button>
+<div class="scanner-page">
+    <div class="scanner-header">
+        <h2>Scanner</h2>
+        <p>Scan barcode, confirm location, add remarks, then update.</p>
     </div>
 
-    <div id="manual-location-container" style="display:none;">
-        <label>Select Correct Location</label>
-        <select id="manual-location"></select>
-    </div>
+    <div class="scanner-grid">
+        <!-- Left: Camera / scan -->
+        <div class="scan-card">
+            <div class="scan-top">
+                
 
-    <button id="update-btn" disabled>Update</button>
+                <button id="start-scanner" class="btn btn-primary" type="button">
+                    Start Scanner
+                </button>
+            </div>
+
+            <div class="video-wrap">
+                <video id="scanner-video" autoplay playsinline></video>
+                <div class="video-hint">Point camera at barcode</div>
+            </div>
+
+            <p id="scan-result" class="scan-result"></p>
+        </div>
+
+        <!-- Right: Details -->
+        <div class="details-card">
+            <div class="section">
+                <label>Scanned Location</label>
+                <input type="text" id="location" readonly />
+            </div>
+
+            <div id="location-confirm" class="confirm-box">
+                <p>Is this location correct?</p>
+                <div class="confirm-actions">
+                    <button type="button" id="yes-btn" class="btn btn-outline">Yes</button>
+                    <button type="button" id="no-btn" class="btn btn-outline">No</button>
+                </div>
+            </div>
+
+            <div id="manual-location-container" class="section" style="display:none;">
+                <label>Select Correct Location</label>
+                <select id="manual-location"></select>
+            </div>
+
+            <div class="section">
+                <label>Remarks</label>
+                <input type="text" id="remark1" placeholder="Remark 1" />
+                <input type="text" id="remark2" placeholder="Remark 2" />
+                <input type="text" id="remark3" placeholder="Remark 3" />
+            </div>
+
+            <button id="update-btn" class="btn btn-success" disabled>Update</button>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -93,7 +124,6 @@ Quagga.onDetected(result => {
         }
 
         if (data.exists) {
-            // ✅ Show location if exists
             if (data.location && data.location.trim() !== "") {
                 locationInput.value = data.location;
             } else {
@@ -102,7 +132,6 @@ Quagga.onDetected(result => {
             manualContainer.style.display = "none";
             updateBtn.disabled = true;
         } else {
-            // ❌ Code not found → blank input
             locationInput.value = "";
             manualContainer.style.display = "none";
             updateBtn.disabled = true;
@@ -125,20 +154,17 @@ noBtn.onclick = () => {
     manualContainer.style.display = "block";
     updateBtn.disabled = true;
 
-    // Fetch all existing locations from API
     fetch('/api/scanner/locations')
         .then(res => res.json())
         .then(data => {
             if (data.success && Array.isArray(data.locations)) {
-                // Clear previous options
                 manualInput.innerHTML = '';
-                // Add placeholder
+
                 const placeholder = document.createElement('option');
                 placeholder.value = '';
                 placeholder.text = '-- Select Location --';
                 manualInput.appendChild(placeholder);
 
-                // Add all locations
                 data.locations.forEach(loc => {
                     const opt = document.createElement('option');
                     opt.value = loc;
@@ -146,7 +172,6 @@ noBtn.onclick = () => {
                     manualInput.appendChild(opt);
                 });
 
-                // Enable update button only when a selection is made
                 manualInput.onchange = () => {
                     updateBtn.disabled = manualInput.value === '';
                 };

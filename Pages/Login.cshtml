@@ -7,12 +7,23 @@
 <link rel="stylesheet" href="~/css/login.css" />
 
 <div class="login-container">
+    <!-- ✅ Back like Register -->
+    <div class="top-row">
+        <a class="back-link" asp-page="/Index">← Back</a>
+    </div>
+
     <h2>Login with OTP</h2>
 
     <!-- Email input group -->
     <div id="emailGroup">
         <input type="email" id="email" placeholder="Enter your email" />
         <button id="sendBtn">Send OTP</button>
+
+        <!-- ✅ Not registered link -->
+        <div class="helper-links">
+            <span>Not registered?</span>
+            <a asp-page="/Register">Create account</a>
+        </div>
     </div>
 
     <!-- OTP input group: 6 numeric boxes -->
@@ -57,7 +68,6 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
         document.getElementById('message').innerText = data.message;
 
         if (data.success) {
-            // Show OTP, hide email
             document.getElementById('emailGroup').style.display = 'none';
             document.getElementById('otpGroup').style.display = 'block';
             document.querySelector('.otp').focus();
@@ -70,7 +80,6 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
 // OTP auto-focus and numeric-only
 document.querySelectorAll('.otp').forEach((input, idx, arr) => {
     input.addEventListener('input', () => {
-        // Allow only digits
         input.value = input.value.replace(/[^0-9]/g, '');
         if (input.value && idx < arr.length - 1) arr[idx + 1].focus();
     });

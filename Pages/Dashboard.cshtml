@@ -1,48 +1,38 @@
 @page
 @model FirebirdWeb.Pages.DashboardModel
 
-
 <link rel="stylesheet" href="~/css/dashboard.css" />
 
-
 <div class="dashboard-page">
-<h2 class="dashboard-header">Dashboard</h2>
+  <h2 class="dashboard-header">Dashboard</h2>
 
-
-<div class="dashboard-cards">
-<!-- Scanner Card -->
-<div class="card" onclick="location.href='@Url.Page("/Scanner")'">
-<h3>Scanner</h3>
-<p>Click here to go to the Scan page</p>
+  <div class="dashboard-cards">
+    <!-- Scanner Card -->
+    <div class="card" onclick="location.href='@Url.Page("/Scanner")'">
+      <h3>Scanner</h3>
+      <p>Click here to go to the Scan page</p>
+    </div>
+  </div>
 </div>
-</div>
-</div>
-
 
 <div id="successPopup" class="popup-message">
-Login Successful!
+  Login Successful!
 </div>
 
-
 <script>
-// Show popup if coming from login
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('loggedIn') === 'true') {
-const popup = document.getElementById('successPopup');
-popup.classList.add('show');
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('loggedIn') === 'true') {
+    const popup = document.getElementById('successPopup');
+    popup.classList.add('show');
 
+    window.history.replaceState({}, document.title, window.location.pathname);
 
-// Remove query param from URL
-window.history.replaceState({}, document.title, window.location.pathname);
-
-
-// Hide popup after 2 seconds
-setTimeout(() => {
-popup.style.animation = 'slideUp 0.5s ease-out forwards';
-setTimeout(() => {
-popup.classList.remove('show');
-popup.style.animation = '';
-}, 500);
-}, 2000);
-}
+    setTimeout(() => {
+      popup.style.animation = 'slideUp 0.5s ease-out forwards';
+      setTimeout(() => {
+        popup.classList.remove('show');
+        popup.style.animation = '';
+      }, 500);
+    }, 2000);
+  }
 </script>

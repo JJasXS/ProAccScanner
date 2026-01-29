@@ -1,0 +1,157 @@
+/* ✅ REPLACE your wwwroot/css/register.css with this (nicer, still minimalist) */
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --input:#f9fafb;
+  --blue:#2563eb;
+  --blue2:#1d4ed8;
+  --shadow: 0 18px 50px rgba(17,24,39,.10);
+}
+
+html,body{
+  height:100%;
+  font-family: 'Inter','Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background: var(--bg);
+}
+
+/* center + breathing space */
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding: 18px 14px;
+}
+
+/* card */
+.register-container{
+  width: 100%;
+  max-width: 390px;
+  background: var(--card);
+  border: 1px solid rgba(229,231,235,.8);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 26px 22px 22px;
+}
+
+/* title area */
+.register-container h2{
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  text-align:center;
+  margin-bottom: 6px;
+}
+
+.register-container p{
+  font-size: 13px;
+  color: var(--muted);
+  text-align:center;
+  margin-bottom: 14px;
+}
+
+/* back link (nice pill) */
+.top-row{
+  display:flex;
+  justify-content:flex-start;
+  margin-bottom: 12px;
+}
+
+.back-link{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
+  text-decoration:none;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(37,99,235,.08);
+}
+
+.back-link:hover{
+  background: rgba(37,99,235,.12);
+  text-decoration:none;
+}
+
+/* inputs */
+.register-container input{
+  width: 100%;
+  height: 46px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  font-size: 14px;
+  color: var(--text);
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+.register-container input::placeholder{
+  color: #9ca3af;
+}
+
+.register-container input:focus{
+  outline:none;
+  background:#fff;
+  border-color: rgba(37,99,235,.55);
+  box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+}
+
+/* button */
+#registerBtn{
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--blue), var(--blue2));
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  margin-top: 6px;
+  box-shadow: 0 10px 20px rgba(37,99,235,.18);
+  transition: transform .06s, filter .15s;
+}
+
+#registerBtn:hover{ filter: brightness(1.03); }
+#registerBtn:active{ transform: translateY(1px); }
+
+/* alert */
+.alert{
+  background: rgba(231, 76, 60, 0.10);
+  border: 1px solid rgba(231, 76, 60, 0.20);
+  color: #b91c1c;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+/* bottom link */
+.login-link{
+  display:block;
+  text-align:center;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--blue);
+  font-weight: 700;
+  text-decoration:none;
+}
+
+.login-link:hover{ text-decoration: underline; }
+
+/* small screens */
+@media (max-width: 420px){
+  .register-container{ padding: 22px 18px 18px; }
+  .register-container h2{ font-size: 20px; }
+}
