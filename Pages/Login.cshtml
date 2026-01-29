@@ -17,7 +17,7 @@
     <!-- Email input group -->
     <div id="emailGroup">
         <input type="email" id="email" placeholder="Enter your email" />
-        <button id="sendBtn">Send OTP</button>
+        <button id="sendBtn" type="button">Send OTP</button>
 
         <!-- ✅ Not registered link -->
         <div class="helper-links">
@@ -26,8 +26,11 @@
         </div>
     </div>
 
-    <!-- OTP input group: 6 numeric boxes -->
-    <div id="otpGroup">
+    <!-- OTP input group -->
+    <div id="otpGroup" style="display:none;">
+        <!-- ✅ store email here so VerifyOTP always has it -->
+        <input type="hidden" id="emailHidden" />
+
         <div class="otp-boxes">
             <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
             <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
@@ -36,22 +39,21 @@
             <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
             <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp" />
         </div>
-        <button id="verifyBtn">Verify OTP</button>
+
+        <button id="verifyBtn" type="button">Verify OTP</button>
     </div>
 
     <div id="message"></div>
 </div>
 
 <script>
+const msg = (t) => document.getElementById('message').innerText = t;
+
 // Send OTP
 document.getElementById('sendBtn').addEventListener('click', async () => {
-    const emailInput = document.getElementById('email');
-    const email = emailInput.value.trim();
+    const email = (document.getElementById('email').value || '').trim();
 
-    if (!email) {
-        document.getElementById('message').innerText = "Please enter your email.";
-        return;
-    }
+    if (!email) { msg("Please enter your email."); return; }
 
     const formData = new FormData();
     formData.append('Email', email);
@@ -62,18 +64,27 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
             body: formData
         });
 
-        if (!res.ok) throw new Error("Network error");
+        const data = await res.json().catch(() => ({}));
 
-        const data = await res.json();
-        document.getElementById('message').innerText = data.message;
+        if (!res.ok) {
+            msg(data?.message || "Error sending OTP.");
+            return;
+        }
+
+        msg(data.message || "");
 
         if (data.success) {
+            // ✅ store email for OTP verify step
+            document.getElementById('emailHidden').value = email;
+
             document.getElementById('emailGroup').style.display = 'none';
             document.getElementById('otpGroup').style.display = 'block';
-            document.querySelector('.otp').focus();
+
+            // focus first otp
+            document.querySelector('.otp')?.focus();
         }
     } catch (err) {
-        document.getElementById('message').innerText = "Error sending OTP.";
+        msg("Error sending OTP.");
     }
 });
 
@@ -93,13 +104,11 @@ document.querySelectorAll('.otp').forEach((input, idx, arr) => {
 
 // Verify OTP
 document.getElementById('verifyBtn').addEventListener('click', async () => {
-    const email = document.getElementById('emailGroup').querySelector('input')?.value.trim();
+    const email = (document.getElementById('emailHidden').value || '').trim();
     const otp = Array.from(document.querySelectorAll('.otp')).map(i => i.value).join('');
 
-    if (!email || otp.length < 6) {
-        document.getElementById('message').innerText = "Please enter all 6 OTP digits.";
-        return;
-    }
+    if (!email) { msg("Email missing. Please go back and enter your email."); return; }
+    if (otp.length < 6) { msg("Please enter all 6 OTP digits."); return; }
 
     const formData = new FormData();
     formData.append('Email', email);
@@ -111,16 +120,20 @@ document.getElementById('verifyBtn').addEventListener('click', async () => {
             body: formData
         });
 
-        if (!res.ok) throw new Error("Network error");
+        const data = await res.json().catch(() => ({}));
 
-        const data = await res.json();
-        document.getElementById('message').innerText = data.message;
+        if (!res.ok) {
+            msg(data?.message || "Error verifying OTP.");
+            return;
+        }
+
+        msg(data.message || "");
 
         if (data.success) {
             window.location.href = data.redirectUrl || '/Dashboard';
         }
     } catch (err) {
-        document.getElementById('message').innerText = "Error verifying OTP.";
+        msg("Error verifying OTP.");
     }
 });
 </script>
