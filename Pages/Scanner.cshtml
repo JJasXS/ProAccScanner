@@ -7,8 +7,31 @@
 <link rel="stylesheet" href="~/css/scanner.css" />
 
 <div class="scanner-page">
-    <div class="scanner-header">
-        <h2>Scanner</h2>
+
+    <!-- ✅ Top bar with hamburger -->
+    <div class="top-row">
+        <button id="menuBtn" class="hamburger-btn" type="button" aria-label="Menu">
+            ☰
+        </button>
+       <center> <div class="top-title">Scanner</div> </center>
+    </div>
+
+    <!-- ✅ Slide menu -->
+    <div id="menuOverlay" class="menu-overlay" style="display:none;"></div>
+
+    <div id="sideMenu" class="side-menu">
+        <div class="side-menu-header">
+            <div class="side-menu-title">Menu</div>
+            <button id="closeMenuBtn" class="side-menu-close" type="button" aria-label="Close">
+                ✕
+            </button>
+        </div>
+
+        <a href="Dashboard" class="menu-item">← Back to Dashboard</a>
+        <a href="Login" class="menu-item">← Back to Login</a>
+
+        <!-- optional logout -->
+        <a href="Index" class="menu-item menu-item-danger">Log out</a>
     </div>
 
     <div class="scanner-grid">
@@ -57,9 +80,7 @@
 
             <button id="update-btn" class="btn btn-success" disabled>Update</button>
 
-            <a href="Dashboard" class="btn btn-outline" style="margin-top:10px; display:inline-block;">
-                ← Back to Dashboard
-            </a>
+           
         </div>
     </div>
 </div>
@@ -70,41 +91,71 @@
 
     <script>
         // ----------------------------
+        // ✅ Hamburger menu logic
+        // ----------------------------
+        const menuBtn = document.getElementById('menuBtn');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+        const sideMenu = document.getElementById('sideMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+
+        function openMenu() {
+            sideMenu.classList.add('open');
+            menuOverlay.style.display = 'block';
+            setTimeout(() => menuOverlay.classList.add('show'), 0);
+        }
+
+        function closeMenu() {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('show');
+            setTimeout(() => menuOverlay.style.display = 'none', 200);
+        }
+
+        menuBtn.addEventListener('click', openMenu);
+        closeMenuBtn.addEventListener('click', closeMenu);
+        menuOverlay.addEventListener('click', closeMenu);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMenu();
+        });
+
+        // ----------------------------
         // DOM
         // ----------------------------
         const startBtn = document.getElementById('start-scanner');
         const video = document.getElementById('scanner-video');
         const videoWrap = document.getElementById('video-wrap');
         const scanResult = document.getElementById('scan-result');
+
         const locationInput = document.getElementById('location');
         const yesBtn = document.getElementById('yes-btn');
         const noBtn = document.getElementById('no-btn');
+
         const manualContainer = document.getElementById('manual-location-container');
         const manualInput = document.getElementById('manual-location');
-        const updateBtn = document.getElementById('update-btn');
 
         const remark1Input = document.getElementById('remark1');
         const remark2Input = document.getElementById('remark2');
         const remark3Input = document.getElementById('remark3');
+
+        const updateBtn = document.getElementById('update-btn');
 
         // ----------------------------
         // State
         // ----------------------------
         let scannerActive = false;
         let stream = null;
-
         let lastScannedCode = "";
         let lastDetectedAt = 0;
 
         // ----------------------------
-        // Yes/No selected indicator
+        // Yes/No indicator
         // ----------------------------
         function setConfirmSelected(which) {
             yesBtn.classList.remove("btn-selected-yes");
             noBtn.classList.remove("btn-selected-no");
 
             if (which === "yes") yesBtn.classList.add("btn-selected-yes");
-            if (which === "no") noBtn.classList.add("btn-selected-no");
+            if (which === "no")  noBtn.classList.add("btn-selected-no");
         }
 
         function clearConfirmSelected() {
@@ -113,7 +164,7 @@
         }
 
         // ----------------------------
-        // ✅ Popup modal (created dynamically)
+        // Updated Modal
         // ----------------------------
         let modalEl = null;
 
@@ -122,37 +173,21 @@
 
             modalEl = document.createElement("div");
             modalEl.id = "updated-modal";
-            modalEl.style.cssText = `
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,.45);
-                display: none;
-                align-items: center;
-                justify-content: center;
-                z-index: 999999;
-            `;
+            modalEl.className = "modal-overlay";
 
             const card = document.createElement("div");
-            card.style.cssText = `
-                width: min(420px, calc(100% - 40px));
-                background: #fff;
-                border-radius: 12px;
-                padding: 18px 16px;
-                box-shadow: 0 10px 30px rgba(0,0,0,.25);
-                font-family: inherit;
-            `;
+            card.className = "modal-card";
 
-            // ✅ Next scan (top) + Back (bottom)
             card.innerHTML = `
-                <h3 style="margin:0 0 8px 0;">Updated ✅</h3>
-                <p style="margin:0 0 14px 0; color:#444;">Record inserted successfully.</p>
+                <h3 class="modal-title">Updated ✅</h3>
+                <p class="modal-desc">Record inserted successfully.</p>
 
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <button type="button" id="next-scan-btn" class="btn btn-primary" style="width:100%;">
+                <div class="modal-actions">
+                    <button type="button" id="next-scan-btn" class="btn btn-primary">
                         Next scan
                     </button>
 
-                    <a href="Dashboard" id="back-dashboard-btn" class="btn btn-outline" style="width:100%; text-align:center;">
+                    <a href="Dashboard" class="btn btn-outline">
                         Back
                     </a>
                 </div>
@@ -161,19 +196,15 @@
             modalEl.appendChild(card);
             document.body.appendChild(modalEl);
 
-            // click outside card = close
             modalEl.addEventListener("click", (e) => {
                 if (e.target === modalEl) hideUpdatedModal();
             });
 
-            // ESC = close
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Escape") hideUpdatedModal();
             });
 
-            // Next scan handler
-            const nextBtn = card.querySelector("#next-scan-btn");
-            nextBtn.addEventListener("click", () => {
+            card.querySelector("#next-scan-btn").addEventListener("click", () => {
                 resetForNextScan();
                 hideUpdatedModal();
             });
@@ -181,16 +212,16 @@
 
         function showUpdatedModal() {
             ensureModal();
-            modalEl.style.display = "flex";
+            modalEl.classList.add("show");
         }
 
         function hideUpdatedModal() {
             if (!modalEl) return;
-            modalEl.style.display = "none";
+            modalEl.classList.remove("show");
         }
 
         // ----------------------------
-        // Reset / next scan
+        // Reset for next scan
         // ----------------------------
         function resetForNextScan() {
             scanResult.innerText = "";
@@ -200,16 +231,15 @@
             remark2Input.value = "";
             remark3Input.value = "";
 
-            clearConfirmSelected();
-
-            lastScannedCode = "";
             manualContainer.style.display = "none";
             manualInput.innerHTML = "";
             manualInput.value = "";
 
+            clearConfirmSelected();
+
+            lastScannedCode = "";
             updateBtn.disabled = true;
 
-            // ✅ auto start scanner again
             if (!scannerActive) startBtn.click();
         }
 
@@ -217,7 +247,7 @@
         // Scanner control
         // ----------------------------
         function stopScanner() {
-            try { Quagga.stop(); } catch (e) { }
+            try { Quagga.stop(); } catch (e) {}
             if (stream) {
                 stream.getTracks().forEach(t => t.stop());
                 stream = null;
@@ -227,46 +257,60 @@
             video.style.display = "none";
         }
 
-        startBtn.addEventListener('click', async () => {
-            if (!scannerActive) {
-                try {
-                    video.style.display = "block";
+        async function startScanner() {
+            video.style.display = "block";
 
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: "environment" }
-                    });
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" }
+            });
 
-                    video.srcObject = stream;
-                    await video.play();
+            video.srcObject = stream;
+            await video.play();
 
-                    Quagga.init({
-                        inputStream: { type: "LiveStream", target: videoWrap },
-                        decoder: { readers: ["code_128_reader", "ean_reader"] }
-                    }, (err) => {
-                        if (err) {
-                            console.error(err);
-                            alert("Failed to start scanner.");
-                            stopScanner();
-                            return;
-                        }
-                        Quagga.start();
-                        scannerActive = true;
-                        startBtn.innerText = "Stop Scanner";
-                    });
-
-                } catch (e) {
-                    console.error(e);
-                    alert("Camera permission blocked / camera not available.");
+            Quagga.init({
+                inputStream: {
+                    type: "LiveStream",
+                    target: videoWrap,
+                    constraints: {
+                        facingMode: "environment"
+                    }
+                },
+                locator: { patchSize: "medium", halfSample: true },
+                decoder: { readers: ["code_128_reader", "ean_reader"] }
+            }, (err) => {
+                if (err) {
+                    console.error(err);
+                    alert("Failed to start scanner.");
                     stopScanner();
+                    return;
                 }
-            } else {
+                Quagga.start();
+                scannerActive = true;
+                startBtn.innerText = "Stop Scanner";
+            });
+        }
+
+        startBtn.addEventListener("click", async () => {
+            if (scannerActive) {
+                stopScanner();
+                return;
+            }
+
+            try {
+                await startScanner();
+            } catch (e) {
+                console.error(e);
+                alert("Camera permission blocked / camera not available.");
                 stopScanner();
             }
         });
 
-        Quagga.onDetected(result => {
+        // ----------------------------
+        // Quagga detected
+        // ----------------------------
+        Quagga.onDetected((result) => {
             const now = Date.now();
-            if (now - lastDetectedAt < 1200) return; // throttle
+            if (now - lastDetectedAt < 1200) return;
             lastDetectedAt = now;
 
             const scannedCode = result?.codeResult?.code || "";
@@ -295,20 +339,16 @@
                 if (data.exists) {
                     locationInput.value = (data.location || "").trim();
 
-                    // ✅ auto set YES selected (green)
                     setConfirmSelected("yes");
 
-                    // ✅ hide manual selection
                     manualContainer.style.display = "none";
                     manualInput.value = "";
 
-                    // ✅ enable update immediately
                     updateBtn.disabled = !lastScannedCode;
                 } else {
-                    locationInput.value = "";
+                    clearConfirmSelected();
                     manualContainer.style.display = "none";
                     updateBtn.disabled = true;
-                    clearConfirmSelected();
                     alert(data.message || "Code not found.");
                 }
             })
@@ -319,57 +359,56 @@
         });
 
         // ----------------------------
-        // Yes / No behavior
+        // Yes / No logic
         // ----------------------------
-        yesBtn.onclick = () => {
+        yesBtn.addEventListener("click", () => {
             setConfirmSelected("yes");
-
             manualContainer.style.display = "none";
             manualInput.value = "";
             updateBtn.disabled = !lastScannedCode;
-        };
+        });
 
-        noBtn.onclick = () => {
+        noBtn.addEventListener("click", () => {
             setConfirmSelected("no");
-
             manualContainer.style.display = "block";
             updateBtn.disabled = true;
 
             fetch('/api/scanner/locations')
                 .then(res => res.json())
                 .then(data => {
-                    if (data.success && Array.isArray(data.locations)) {
-                        manualInput.innerHTML = '';
-
-                        const placeholder = document.createElement('option');
-                        placeholder.value = '';
-                        placeholder.text = '-- Select Location --';
-                        manualInput.appendChild(placeholder);
-
-                        data.locations.forEach(loc => {
-                            const opt = document.createElement('option');
-                            opt.value = loc;
-                            opt.text = loc;
-                            manualInput.appendChild(opt);
-                        });
-
-                        manualInput.onchange = () => {
-                            updateBtn.disabled = (manualInput.value === '') || !lastScannedCode;
-                        };
-                    } else {
+                    if (!data.success || !Array.isArray(data.locations)) {
                         alert("Failed to load locations.");
+                        return;
                     }
+
+                    manualInput.innerHTML = "";
+
+                    const placeholder = document.createElement("option");
+                    placeholder.value = "";
+                    placeholder.text = "-- Select Location --";
+                    manualInput.appendChild(placeholder);
+
+                    data.locations.forEach(loc => {
+                        const opt = document.createElement("option");
+                        opt.value = loc;
+                        opt.text = loc;
+                        manualInput.appendChild(opt);
+                    });
+
+                    manualInput.onchange = () => {
+                        updateBtn.disabled = (manualInput.value === "") || !lastScannedCode;
+                    };
                 })
                 .catch(err => {
                     console.error(err);
                     alert("Failed to load locations!");
                 });
-        };
+        });
 
         // ----------------------------
-        // Update -> insert new record
+        // Update -> insert record
         // ----------------------------
-        updateBtn.addEventListener('click', () => {
+        updateBtn.addEventListener("click", () => {
             if (!lastScannedCode) {
                 alert("No scanned code.");
                 return;

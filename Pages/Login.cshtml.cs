@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using FirebirdWeb.Helpers;
 using FirebirdSql.Data.FirebirdClient;
 
+using Microsoft.AspNetCore.Authentication;                 // ✅ ADD
+using Microsoft.AspNetCore.Authentication.Cookies;         // ✅ ADD
+using System.Security.Claims;                              // ✅ ADD
+
 namespace FirebirdWeb.Pages
 {
     [IgnoreAntiforgeryToken] // Allow AJAX POSTs without antiforgery token
@@ -45,7 +49,7 @@ namespace FirebirdWeb.Pages
             }
         }
 
-        // ✅ NEW: get SY_USER.NAME by email
+        // ✅ Get SY_USER.NAME by email
         private string GetSyUserName(string email)
         {
             try
@@ -77,7 +81,6 @@ namespace FirebirdWeb.Pages
             if (string.IsNullOrWhiteSpace(Email))
                 return new JsonResult(new { success = false, message = "Email required" });
 
-            // ✅ 1) Validate email exists in DB
             if (!EmailExistsInSyUser(Email))
             {
                 return new JsonResult(new
@@ -87,13 +90,11 @@ namespace FirebirdWeb.Pages
                 });
             }
 
-            // ✅ 2) Generate + store OTP
             var otp = new Random().Next(100000, 999999).ToString();
             TempOTPStore.StoreOTP(Email, otp);
 
             Console.WriteLine($"[DEBUG] OTP for {Email}: {otp}");
 
-            // ✅ 3) Send OTP email
             bool emailSent = _emailHelper.SendEmail(
                 Email,
                 "Your OTP Code",
@@ -106,7 +107,7 @@ namespace FirebirdWeb.Pages
             return new JsonResult(new { success = true, message = "OTP sent successfully" });
         }
 
-        public JsonResult OnPostVerifyOTP()
+        public async Task<JsonResult> OnPostVerifyOTPAsync()
         {
             Email = (Email ?? "").Trim();
             OTP = (OTP ?? "").Trim();
@@ -114,7 +115,6 @@ namespace FirebirdWeb.Pages
             if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(OTP))
                 return new JsonResult(new { success = false, message = "Email and OTP required" });
 
-            // (Optional but good) ✅ ensure email still exists
             if (!EmailExistsInSyUser(Email))
             {
                 return new JsonResult(new
@@ -126,23 +126,43 @@ namespace FirebirdWeb.Pages
 
             bool isValid = TempOTPStore.ValidateOTP(Email, OTP);
 
-            if (isValid)
+            if (!isValid)
+                return new JsonResult(new { success = false, message = "Invalid OTP" });
+
+            // ✅ Get name
+            var userName = GetSyUserName(Email);
+
+            // ✅ Create login cookie (persistent)
+            var claims = new List<Claim>
             {
-                // ✅ Load Name from SY_USER and store into Session
-                var userName = GetSyUserName(Email);
+                new Claim(ClaimTypes.NameIdentifier, Email),
+                new Claim(ClaimTypes.Email, Email),
+                new Claim(ClaimTypes.Name, string.IsNullOrWhiteSpace(userName) ? Email : userName),
+            };
 
-                HttpContext.Session.SetString("UserEmail", Email);
-                HttpContext.Session.SetString("UserName", userName);
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
 
-                return new JsonResult(new
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal,
+                new AuthenticationProperties
                 {
-                    success = true,
-                    message = "OTP verified successfully",
-                    redirectUrl = Url.Page("/Dashboard")
-                });
-            }
+                    IsPersistent = true,                 // ✅ stays after closing browser
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+                }
+            );
 
-            return new JsonResult(new { success = false, message = "Invalid OTP" });
+            // (Optional) keep session too if you want
+            HttpContext.Session.SetString("UserEmail", Email);
+            HttpContext.Session.SetString("UserName", userName);
+
+            return new JsonResult(new
+            {
+                success = true,
+                message = "OTP verified successfully",
+                redirectUrl = Url.Page("/Dashboard", null, new { loggedIn = "true" })
+            });
         }
     }
 }

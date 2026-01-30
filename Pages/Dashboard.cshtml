@@ -8,12 +8,33 @@
 
 <div class="dashboard-page">
 
+    <!-- ✅ Top bar with hamburger -->
     <div class="top-row">
-        <a asp-page="/Login" class="back-link">← Back to Login</a>
+        <button id="menuBtn" class="hamburger-btn" type="button" aria-label="Menu">
+            ☰
+        </button>
+        <div class="top-title">Dashboard</div>
     </div>
 
-    <h2 class="dashboard-header">Dashboard</h2>
+    <!-- ✅ Slide menu -->
+   <div id="menuOverlay" class="menu-overlay"></div>
 
+
+    <div id="sideMenu" class="side-menu">
+        <div class="side-menu-header">
+            <div class="side-menu-title">Menu</div>
+            <button id="closeMenuBtn" class="side-menu-close" type="button" aria-label="Close">
+                ✕
+            </button>
+        </div>
+
+        <a asp-page="/Login" class="menu-item">← Back to Login</a>
+
+        <!-- ✅ Logout (change href if you have Logout page/handler) -->
+        <a asp-page="/Index" class="menu-item menu-item-danger">Log out</a>
+    </div>
+
+    <!-- main content -->
     <div class="dashboard-cards">
         <!-- Scanner Card -->
         <div class="card" onclick="location.href='@Url.Page("/Scanner")'">
@@ -28,6 +49,9 @@
 </div>
 
 <script>
+    // ----------------------------
+    // ✅ Login success popup
+    // ----------------------------
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('loggedIn') === 'true') {
         const popup = document.getElementById('successPopup');
@@ -43,4 +67,32 @@
             }, 500);
         }, 2000);
     }
+
+    // ----------------------------
+    // ✅ Hamburger menu logic
+    // ----------------------------
+    const menuBtn = document.getElementById('menuBtn');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    const sideMenu = document.getElementById('sideMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+
+    function openMenu() {
+        sideMenu.classList.add('open');
+        menuOverlay.style.display = 'block';
+        setTimeout(() => menuOverlay.classList.add('show'), 0);
+    }
+
+    function closeMenu() {
+        sideMenu.classList.remove('open');
+        menuOverlay.classList.remove('show');
+        setTimeout(() => menuOverlay.style.display = 'none', 200);
+    }
+
+    menuBtn.addEventListener('click', openMenu);
+    closeMenuBtn.addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('click', closeMenu);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMenu();
+    });
 </script>
