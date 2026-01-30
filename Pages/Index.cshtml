@@ -4,122 +4,25 @@
     ViewData["Title"] = "Welcome";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewData["Title"] - FirebirdWeb</title>
-    <style>
-        /* Reset and basic styling */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<link rel="stylesheet" href="~/css/index.css" />
 
-        html, body {
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+<div class="landing-container">
 
-        .landing-container {
-            text-align: center;
-            background-color: #fff;
-            padding: 40px 60px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            max-width: 400px;
-            width: 100%;
-        }
+    <img src="@Url.Content("~/images/logo.png")" alt="Logo" class="landing-logo" />
 
-        .landing-container h1 {
-            font-size: 32px;
-            color: #333;
-            margin-bottom: 20px;
-        }
+    <h1>JusPrint Scanning System</h1>
+    <p>Click below to login:</p>
 
-        .landing-container p {
-            font-size: 18px;
-            color: #555;
-            margin-bottom: 30px;
-        }
-
-        .landing-container a button {
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .landing-container a:first-child button {
-            background-color: #667eea;
-            color: white;
-        }
-
-        .landing-container a:first-child button:hover {
-            background-color: #5a67d8;
-        }
-
-        .landing-container a:last-child button {
-            background-color: #f1f1f1;
-            color: #333;
-            margin-left: 20px;
-        }
-
-        .landing-container a:last-child button:hover {
-            background-color: #e2e2e2;
-        }
-
-        hr {
-            margin-top: 40px;
-            border: 0;
-            height: 1px;
-            background-color: #ccc;
-        }
-
-        /* Razor-safe responsive */
-        @@media (max-width: 500px) {
-            .landing-container {
-                padding: 30px 20px;
-            }
-
-            .landing-container a button {
-                display: block;
-                width: 100%;
-                margin: 10px 0 0 0;
-            }
-
-            .landing-container a:last-child button {
-                margin-left: 0;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="landing-container">
-        <h1>Welcome to FirebirdWeb</h1>
-        <p>Click below to login or register:</p>
-
-        <div>
-            <a asp-page="/Login">
-                <button>Login</button>
-            </a>
-
-            <a asp-page="/Register">
-                <button>Register</button>
-            </a>
-        </div>
-
-        <hr />
-
-       
+    <div class="btn-row">
+        <a asp-page="/Login" class="btn-link">
+            <button id="loginBtn" class="btn btn-primary" type="button">Login</button>
+        </a>
     </div>
-</body>
-</html>
+
+    <hr />
+
+    <!-- Version text -->
+    <div class="app-version" style="margin-top:12px; font-size:12px; opacity:.75;">
+        V1.0
+    </div>
+</div>
