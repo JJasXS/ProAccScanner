@@ -16,9 +16,16 @@
         <div class="top-title">Dashboard</div>
     </div>
 
-    <!-- ✅ Slide menu -->
-   <div id="menuOverlay" class="menu-overlay"></div>
+    <!-- ✅ Welcome row -->
+    <div class="welcome-row">
+        <div class="welcome-text">
+            Welcome, <span class="welcome-name">@Model.UserName</span>
+        </div>
+     
+    </div>
 
+    <!-- ✅ Slide menu -->
+    <div id="menuOverlay" class="menu-overlay"></div>
 
     <div id="sideMenu" class="side-menu">
         <div class="side-menu-header">
@@ -28,9 +35,15 @@
             </button>
         </div>
 
+        <!-- show user in menu too -->
+        <div class="side-user">
+            <div class="side-user-name">@Model.UserName</div>
+            <div class="side-user-email">@Model.UserEmail</div>
+        </div>
+
         <a asp-page="/Login" class="menu-item">← Back to Login</a>
 
-        <!-- ✅ Logout (change href if you have Logout page/handler) -->
+        <!-- ⚠️ This is NOT real logout. It just goes to Index. -->
         <a asp-page="/Index" class="menu-item menu-item-danger">Log out</a>
     </div>
 
