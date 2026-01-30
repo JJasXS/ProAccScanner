@@ -14,17 +14,17 @@
     <div class="scanner-grid">
         <!-- Left: Camera / scan -->
         <div class="scan-card">
-            
-
             <div class="video-wrap" id="video-wrap">
                 <video id="scanner-video" autoplay playsinline></video>
                 <div class="video-hint">Point camera at barcode</div>
             </div>
-<div class="scan-top">
+
+            <div class="scan-top">
                 <button id="start-scanner" class="btn btn-primary" type="button">
                     Start Scanner
                 </button>
             </div>
+
             <p id="scan-result" class="scan-result"></p>
         </div>
 
@@ -57,12 +57,10 @@
 
             <button id="update-btn" class="btn btn-success" disabled>Update</button>
 
-<a href="Dashboard" class="btn btn-outline" style="margin-top:10px; display:inline-block;">
-    ← Back to Dashboard
-</a>
-
-
-                </div>
+            <a href="Dashboard" class="btn btn-outline" style="margin-top:10px; display:inline-block;">
+                ← Back to Dashboard
+            </a>
+        </div>
     </div>
 </div>
 
@@ -71,6 +69,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 
     <script>
+        // ----------------------------
+        // DOM
+        // ----------------------------
         const startBtn = document.getElementById('start-scanner');
         const video = document.getElementById('scanner-video');
         const videoWrap = document.getElementById('video-wrap');
@@ -86,13 +87,135 @@
         const remark2Input = document.getElementById('remark2');
         const remark3Input = document.getElementById('remark3');
 
+        // ----------------------------
+        // State
+        // ----------------------------
         let scannerActive = false;
         let stream = null;
 
-        // ✅ store scanned code for update
         let lastScannedCode = "";
         let lastDetectedAt = 0;
 
+        // ----------------------------
+        // Yes/No selected indicator
+        // ----------------------------
+        function setConfirmSelected(which) {
+            yesBtn.classList.remove("btn-selected-yes");
+            noBtn.classList.remove("btn-selected-no");
+
+            if (which === "yes") yesBtn.classList.add("btn-selected-yes");
+            if (which === "no") noBtn.classList.add("btn-selected-no");
+        }
+
+        function clearConfirmSelected() {
+            yesBtn.classList.remove("btn-selected-yes");
+            noBtn.classList.remove("btn-selected-no");
+        }
+
+        // ----------------------------
+        // ✅ Popup modal (created dynamically)
+        // ----------------------------
+        let modalEl = null;
+
+        function ensureModal() {
+            if (modalEl) return;
+
+            modalEl = document.createElement("div");
+            modalEl.id = "updated-modal";
+            modalEl.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,.45);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 999999;
+            `;
+
+            const card = document.createElement("div");
+            card.style.cssText = `
+                width: min(420px, calc(100% - 40px));
+                background: #fff;
+                border-radius: 12px;
+                padding: 18px 16px;
+                box-shadow: 0 10px 30px rgba(0,0,0,.25);
+                font-family: inherit;
+            `;
+
+            // ✅ Next scan (top) + Back (bottom)
+            card.innerHTML = `
+                <h3 style="margin:0 0 8px 0;">Updated ✅</h3>
+                <p style="margin:0 0 14px 0; color:#444;">Record inserted successfully.</p>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <button type="button" id="next-scan-btn" class="btn btn-primary" style="width:100%;">
+                        Next scan
+                    </button>
+
+                    <a href="Dashboard" id="back-dashboard-btn" class="btn btn-outline" style="width:100%; text-align:center;">
+                        Back
+                    </a>
+                </div>
+            `;
+
+            modalEl.appendChild(card);
+            document.body.appendChild(modalEl);
+
+            // click outside card = close
+            modalEl.addEventListener("click", (e) => {
+                if (e.target === modalEl) hideUpdatedModal();
+            });
+
+            // ESC = close
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") hideUpdatedModal();
+            });
+
+            // Next scan handler
+            const nextBtn = card.querySelector("#next-scan-btn");
+            nextBtn.addEventListener("click", () => {
+                resetForNextScan();
+                hideUpdatedModal();
+            });
+        }
+
+        function showUpdatedModal() {
+            ensureModal();
+            modalEl.style.display = "flex";
+        }
+
+        function hideUpdatedModal() {
+            if (!modalEl) return;
+            modalEl.style.display = "none";
+        }
+
+        // ----------------------------
+        // Reset / next scan
+        // ----------------------------
+        function resetForNextScan() {
+            scanResult.innerText = "";
+            locationInput.value = "";
+
+            remark1Input.value = "";
+            remark2Input.value = "";
+            remark3Input.value = "";
+
+            clearConfirmSelected();
+
+            lastScannedCode = "";
+            manualContainer.style.display = "none";
+            manualInput.innerHTML = "";
+            manualInput.value = "";
+
+            updateBtn.disabled = true;
+
+            // ✅ auto start scanner again
+            if (!scannerActive) startBtn.click();
+        }
+
+        // ----------------------------
+        // Scanner control
+        // ----------------------------
         function stopScanner() {
             try { Quagga.stop(); } catch (e) { }
             if (stream) {
@@ -106,27 +229,36 @@
 
         startBtn.addEventListener('click', async () => {
             if (!scannerActive) {
-                video.style.display = "block";
+                try {
+                    video.style.display = "block";
 
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                video.srcObject = stream;
-                await video.play();
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" }
+                    });
 
-                Quagga.init({
-                    inputStream: { type: "LiveStream", target: videoWrap },
-                    decoder: { readers: ["code_128_reader", "ean_reader"] }
-                }, (err) => {
-                    if (err) {
-                        console.error(err);
-                        alert("Failed to start scanner.");
-                        stopScanner();
-                        return;
-                    }
-                    Quagga.start();
-                    scannerActive = true;
-                    startBtn.innerText = "Stop Scanner";
-                });
+                    video.srcObject = stream;
+                    await video.play();
 
+                    Quagga.init({
+                        inputStream: { type: "LiveStream", target: videoWrap },
+                        decoder: { readers: ["code_128_reader", "ean_reader"] }
+                    }, (err) => {
+                        if (err) {
+                            console.error(err);
+                            alert("Failed to start scanner.");
+                            stopScanner();
+                            return;
+                        }
+                        Quagga.start();
+                        scannerActive = true;
+                        startBtn.innerText = "Stop Scanner";
+                    });
+
+                } catch (e) {
+                    console.error(e);
+                    alert("Camera permission blocked / camera not available.");
+                    stopScanner();
+                }
             } else {
                 stopScanner();
             }
@@ -161,22 +293,22 @@
                 }
 
                 if (data.exists) {
-    locationInput.value = (data.location || "").trim();
+                    locationInput.value = (data.location || "").trim();
 
-    // ✅ Auto-confirm YES by default
-    manualContainer.style.display = "none";
-    manualInput.value = "";
+                    // ✅ auto set YES selected (green)
+                    setConfirmSelected("yes");
 
-    // ✅ Enable Update immediately (not faded)
-    updateBtn.disabled = !lastScannedCode;
+                    // ✅ hide manual selection
+                    manualContainer.style.display = "none";
+                    manualInput.value = "";
 
-    // (optional) scroll to remarks/update area
-    // updateBtn.scrollIntoView({ behavior: "smooth", block: "center" });
-} else {
-
+                    // ✅ enable update immediately
+                    updateBtn.disabled = !lastScannedCode;
+                } else {
                     locationInput.value = "";
                     manualContainer.style.display = "none";
                     updateBtn.disabled = true;
+                    clearConfirmSelected();
                     alert(data.message || "Code not found.");
                 }
             })
@@ -186,13 +318,20 @@
             });
         });
 
+        // ----------------------------
+        // Yes / No behavior
+        // ----------------------------
         yesBtn.onclick = () => {
+            setConfirmSelected("yes");
+
             manualContainer.style.display = "none";
             manualInput.value = "";
             updateBtn.disabled = !lastScannedCode;
         };
 
         noBtn.onclick = () => {
+            setConfirmSelected("no");
+
             manualContainer.style.display = "block";
             updateBtn.disabled = true;
 
@@ -227,7 +366,9 @@
                 });
         };
 
-        // ✅ Update -> insert new record
+        // ----------------------------
+        // Update -> insert new record
+        // ----------------------------
         updateBtn.addEventListener('click', () => {
             if (!lastScannedCode) {
                 alert("No scanned code.");
@@ -256,8 +397,9 @@
                     alert("Insert failed: " + (data.message || "Unknown error"));
                     return;
                 }
-                alert("Inserted successfully!");
+
                 updateBtn.disabled = true;
+                showUpdatedModal();
             })
             .catch(err => {
                 console.error(err);

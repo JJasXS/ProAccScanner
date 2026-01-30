@@ -253,3 +253,44 @@ input:focus, select:focus{
   border-radius: 10px;     /* match modern UI */
   text-align: center;
 }
+
+/* ✅ Yes/No selected indicator */
+.confirm-actions .btn {
+  width: 100%; /* keep equal width in the row */
+}
+
+.btn-selected-yes{
+  background: #10b981 !important;   /* green */
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 18px rgba(16,185,129,0.18);
+}
+
+.btn-selected-no{
+  background: #ef4444 !important;   /* red */
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 18px rgba(239,68,68,0.18);
+}
+
+
+/* ✅ ADD THESE to the bottom of scanner.css */
+
+/* ✅ Yes/No selected indicator */
+.confirm-actions .btn {
+  width: 100%;
+}
+
+.btn-selected-yes{
+  background: #10b981 !important;   /* green */
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 18px rgba(16,185,129,0.18);
+}
+
+.btn-selected-no{
+  background: #ef4444 !important;   /* red */
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 10px 18px rgba(239,68,68,0.18);
+}
