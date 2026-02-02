@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using FirebirdWeb.Helpers;
 using FirebirdSql.Data.FirebirdClient;
 
-using Microsoft.AspNetCore.Authentication;                 // ✅ ADD
-using Microsoft.AspNetCore.Authentication.Cookies;         // ✅ ADD
-using System.Security.Claims;                              // ✅ ADD
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 
 namespace FirebirdWeb.Pages
 {
@@ -24,15 +24,16 @@ namespace FirebirdWeb.Pages
         [BindProperty] public string Email { get; set; } = string.Empty;
         [BindProperty] public string OTP { get; set; } = string.Empty;
 
-        // ✅ Firebird: check SY_USER for email
-        private bool EmailExistsInSyUser(string email)
+        // ✅ Check user exists + active (IsActive)
+        // NOTE: This supports ISACTIVE values like 1/0 OR Y/N OR TRUE/FALSE.
+        private (bool exists, bool active) GetUserExistsAndActive(string email)
         {
             try
             {
                 using var con = _db.GetConnection();
 
                 const string sql = @"
-                    SELECT FIRST 1 EMAIL
+                    SELECT FIRST 1 EMAIL, ISACTIVE
                     FROM SY_USER
                     WHERE UPPER(EMAIL) = UPPER(@Email)
                 ";
@@ -40,12 +41,23 @@ namespace FirebirdWeb.Pages
                 using var cmd = new FbCommand(sql, con);
                 cmd.Parameters.AddWithValue("@Email", (email ?? "").Trim());
 
-                return cmd.ExecuteScalar() != null;
+                using var r = cmd.ExecuteReader();
+                if (!r.Read()) return (false, false);
+
+                var isActiveObj = r["ISACTIVE"];
+                var isActiveStr = isActiveObj?.ToString()?.Trim() ?? "";
+
+                bool active =
+                    isActiveStr == "1" ||
+                    isActiveStr.Equals("Y", StringComparison.OrdinalIgnoreCase) ||
+                    isActiveStr.Equals("TRUE", StringComparison.OrdinalIgnoreCase);
+
+                return (true, active);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("[DB ERROR] EmailExistsInSyUser: " + ex.Message);
-                return false;
+                Console.WriteLine("[DB ERROR] GetUserExistsAndActive: " + ex.Message);
+                return (false, false);
             }
         }
 
@@ -81,7 +93,10 @@ namespace FirebirdWeb.Pages
             if (string.IsNullOrWhiteSpace(Email))
                 return new JsonResult(new { success = false, message = "Email required" });
 
-            if (!EmailExistsInSyUser(Email))
+            // ✅ 1) validate exists + active
+            var (exists, active) = GetUserExistsAndActive(Email);
+
+            if (!exists)
             {
                 return new JsonResult(new
                 {
@@ -90,11 +105,22 @@ namespace FirebirdWeb.Pages
                 });
             }
 
+            if (!active)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "This user is inactive. Please contact admin."
+                });
+            }
+
+            // ✅ 2) Generate + store OTP
             var otp = new Random().Next(100000, 999999).ToString();
             TempOTPStore.StoreOTP(Email, otp);
 
             Console.WriteLine($"[DEBUG] OTP for {Email}: {otp}");
 
+            // ✅ 3) Send OTP email
             bool emailSent = _emailHelper.SendEmail(
                 Email,
                 "Your OTP Code",
@@ -115,7 +141,10 @@ namespace FirebirdWeb.Pages
             if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(OTP))
                 return new JsonResult(new { success = false, message = "Email and OTP required" });
 
-            if (!EmailExistsInSyUser(Email))
+            // ✅ 1) validate exists + active again (important)
+            var (exists, active) = GetUserExistsAndActive(Email);
+
+            if (!exists)
             {
                 return new JsonResult(new
                 {
@@ -124,15 +153,25 @@ namespace FirebirdWeb.Pages
                 });
             }
 
+            if (!active)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "This user is inactive. Please contact admin."
+                });
+            }
+
+            // ✅ 2) validate OTP
             bool isValid = TempOTPStore.ValidateOTP(Email, OTP);
 
             if (!isValid)
                 return new JsonResult(new { success = false, message = "Invalid OTP" });
 
-            // ✅ Get name
+            // ✅ 3) Get name
             var userName = GetSyUserName(Email);
 
-            // ✅ Create login cookie (persistent)
+            // ✅ 4) Create login cookie (persistent)
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, Email),
@@ -148,12 +187,12 @@ namespace FirebirdWeb.Pages
                 principal,
                 new AuthenticationProperties
                 {
-                    IsPersistent = true,                 // ✅ stays after closing browser
+                    IsPersistent = true, // ✅ stays after closing browser
                     ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
                 }
             );
 
-            // (Optional) keep session too if you want
+            // ✅ Optional: keep session too
             HttpContext.Session.SetString("UserEmail", Email);
             HttpContext.Session.SetString("UserName", userName);
 
