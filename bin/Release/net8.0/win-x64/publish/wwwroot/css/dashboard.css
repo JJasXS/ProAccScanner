@@ -1,0 +1,417 @@
+/* dashboard.css - clean modern dashboard */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* Page wrapper */
+.dashboard-page {
+  min-height: 100vh;
+  padding: 28px 18px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ----------------------------
+   Top bar
+---------------------------- */
+.top-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.top-title{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:-0.2px;
+}
+
+/* Hamburger button */
+.hamburger-btn{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  font-size:20px;
+  font-weight:900;
+  cursor:pointer;
+  transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.hamburger-btn:hover{
+  border-color:#cbd5e1;
+  box-shadow:0 10px 18px rgba(0,0,0,0.06);
+}
+
+.hamburger-btn:active{ transform: translateY(1px); }
+
+/* ----------------------------
+   Welcome row
+---------------------------- */
+.welcome-row{
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 18px rgba(0,0,0,0.03);
+}
+
+.welcome-text{
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.welcome-name{
+  font-weight: 900;
+}
+
+.welcome-email{
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+/* side menu user info */
+.side-user{
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f5f6f8;
+  border: 1px solid #e5e7eb;
+  margin: 8px 0 12px;
+}
+
+.side-user-name{
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.side-user-email{
+  font-size: 12px;
+  opacity: .75;
+  margin-top: 2px;
+}
+
+/* ----------------------------
+   Card grid
+---------------------------- */
+.dashboard-cards{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:16px;
+}
+
+/* Card */
+.card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:18px;
+  box-shadow:0 10px 18px rgba(0,0,0,0.04);
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  top:0; left:0;
+  height:4px; width:100%;
+  background: linear-gradient(90deg, #2563eb, #10b981);
+  opacity:0.95;
+}
+
+.card:hover{
+  transform: translateY(-2px);
+  border-color:#cbd5e1;
+  box-shadow:0 14px 28px rgba(0,0,0,0.08);
+}
+
+.card:active{ transform: translateY(0); }
+
+.card h3{
+  font-size:18px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+.card p{
+  font-size:13px;
+  color:#4b5563;
+  line-height:1.4;
+}
+
+/* ----------------------------
+   Popup (login success)
+---------------------------- */
+.popup-message{
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  background: #111827;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+  transform: translateY(-18px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.popup-message.show{
+  animation: slideDown .35s ease-out forwards;
+}
+
+@keyframes slideDown{
+  from { transform: translateY(-18px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUp{
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(-18px); opacity: 0; }
+}
+
+/* ----------------------------
+   Hamburger menu overlay + drawer
+---------------------------- */
+.menu-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  opacity: 0;
+  transition: opacity .2s ease;
+  z-index: 9998;
+  display: none; /* JS toggles */
+}
+
+.menu-overlay.show{ opacity: 1; }
+
+/* Drawer */
+.side-menu{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: min(320px, 85vw);
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  padding: 14px;
+  z-index: 9999;
+
+  transform: translateX(-105%);
+  transition: transform .2s ease;
+
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.side-menu.open{
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.side-menu-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+
+.side-menu-title{
+  font-size:16px;
+  font-weight:900;
+}
+
+.side-menu-close{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  cursor:pointer;
+  font-weight:900;
+  transition: box-shadow .15s ease, border-color .15s ease, transform .08s ease;
+}
+
+.side-menu-close:hover{
+  border-color:#cbd5e1;
+  box-shadow:0 10px 18px rgba(0,0,0,0.06);
+}
+.side-menu-close:active{ transform: translateY(1px); }
+
+.menu-item{
+  display:block;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  margin-bottom:10px;
+  text-decoration:none;
+  color:#111827;
+  font-weight:800;
+  background:#fff;
+  transition: box-shadow .15s ease, border-color .15s ease, transform .08s ease;
+}
+
+.menu-item:hover{
+  border-color:#cbd5e1;
+  box-shadow:10px 20px 20px rgba(0,0,0,0.06);
+}
+.menu-item:active{ transform: translateY(1px); }
+
+.menu-item-danger{
+  border-color: rgba(239,68,68,.35);
+  color: #b91c1c;
+}
+.menu-item-danger:hover{
+  border-color: rgba(239,68,68,.65);
+}
+
+/* ----------------------------
+   Responsive
+---------------------------- */
+@media (max-width: 900px){
+  .dashboard-cards{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px){
+  .dashboard-cards{ grid-template-columns: 1fr; }
+
+  .popup-message{
+    left: 12px;
+    right: 12px;
+    top: 12px;
+    text-align: center;
+  }
+}
+
+/* =========================
+   Welcome Card (Nicer UI)
+   ========================= */
+
+.welcome-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px 18px;
+  margin: 14px 0 16px 0;
+
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(16, 185, 129, 0.12));
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  overflow: hidden;
+}
+
+.welcome-card::before {
+  content: "";
+  position: absolute;
+  inset: -40px -60px auto auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.20), transparent 60%);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.welcome-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1;
+}
+
+.welcome-kicker {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.welcome-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  line-height: 1.1;
+}
+
+/* ✅ Username highlight */
+.welcome-name {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+
+  /* gradient text */
+  background: linear-gradient(90deg, #ffffff, rgba(255,255,255,0.75));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  text-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+/* Optional: small subtitle (if you add later) */
+.welcome-sub {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Right badge area (avatar bubble) */
+.welcome-badge {
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Add a subtle icon inside badge without touching HTML */
+.welcome-badge::after {
+  content: "👋";
+  font-size: 20px;
+  transform: translateY(1px);
+}
+
+/* Mobile spacing */
+@media (max-width: 520px) {
+  .welcome-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  .welcome-name {
+    font-size: 20px;
+  }
+}
