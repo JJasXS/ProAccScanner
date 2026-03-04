@@ -302,3 +302,116 @@ html, body {
     text-align: center;
   }
 }
+
+/* =========================
+   Welcome Card (Nicer UI)
+   ========================= */
+
+.welcome-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px 18px;
+  margin: 14px 0 16px 0;
+
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(16, 185, 129, 0.12));
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  overflow: hidden;
+}
+
+.welcome-card::before {
+  content: "";
+  position: absolute;
+  inset: -40px -60px auto auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.20), transparent 60%);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.welcome-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1;
+}
+
+.welcome-kicker {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.welcome-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  line-height: 1.1;
+}
+
+/* ✅ Username highlight */
+.welcome-name {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+
+  /* gradient text */
+  background: linear-gradient(90deg, #ffffff, rgba(255,255,255,0.75));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  text-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+/* Optional: small subtitle (if you add later) */
+.welcome-sub {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Right badge area (avatar bubble) */
+.welcome-badge {
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Add a subtle icon inside badge without touching HTML */
+.welcome-badge::after {
+  content: "👋";
+  font-size: 20px;
+  transform: translateY(1px);
+}
+
+/* Mobile spacing */
+@media (max-width: 520px) {
+  .welcome-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  .welcome-name {
+    font-size: 20px;
+  }
+}
