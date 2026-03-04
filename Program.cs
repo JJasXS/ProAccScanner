@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Http;                   // ✅ SameSiteMode
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ Enable Windows Service support
+builder.Host.UseWindowsService();
+
 // ----------------------------
 // Services
 // ----------------------------

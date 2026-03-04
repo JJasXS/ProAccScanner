@@ -1,7 +1,7 @@
 {
   "version": 3,
   "targets": {
-    "net6.0": {
+    "net8.0": {
       "BCrypt.Net-Next/4.0.3": {
         "type": "package",
         "compile": {
@@ -18,10 +18,10 @@
       "FirebirdSql.Data.FirebirdClient/10.3.4": {
         "type": "package",
         "compile": {
-          "lib/net6.0/FirebirdSql.Data.FirebirdClient.dll": {}
+          "lib/net8.0/FirebirdSql.Data.FirebirdClient.dll": {}
         },
         "runtime": {
-          "lib/net6.0/FirebirdSql.Data.FirebirdClient.dll": {}
+          "lib/net8.0/FirebirdSql.Data.FirebirdClient.dll": {}
         }
       },
       "Microsoft.Extensions.Configuration/6.0.0": {
@@ -580,12 +580,12 @@
           "runtime.native.System.Data.SqlClient.sni": "4.4.0"
         },
         "compile": {
-          "lib/net6.0/System.Data.SqlClient.dll": {
+          "lib/net8.0/System.Data.SqlClient.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/System.Data.SqlClient.dll": {
+          "lib/net8.0/System.Data.SqlClient.dll": {
             "related": ".xml"
           }
         },
@@ -593,11 +593,11 @@
           "buildTransitive/net6.0/_._": {}
         },
         "runtimeTargets": {
-          "runtimes/unix/lib/net6.0/System.Data.SqlClient.dll": {
+          "runtimes/unix/lib/net8.0/System.Data.SqlClient.dll": {
             "assetType": "runtime",
             "rid": "unix"
           },
-          "runtimes/win/lib/net6.0/System.Data.SqlClient.dll": {
+          "runtimes/win/lib/net8.0/System.Data.SqlClient.dll": {
             "assetType": "runtime",
             "rid": "win"
           }
@@ -1669,7 +1669,7 @@
     }
   },
   "projectFileDependencyGroups": {
-    "net6.0": [
+    "net8.0": [
       "BCrypt.Net-Next >= 4.0.3",
       "FirebirdSql.Data.FirebirdClient >= 10.3.4",
       "Microsoft.Extensions.Hosting.WindowsServices >= 6.0.1",
@@ -1677,29 +1677,29 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\sd01\\.nuget\\packages\\": {}
+    "C:\\Users\\sqlsupport\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\sd01\\ProAccScanner\\FirebirdWeb.csproj",
+      "projectUniqueName": "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj",
       "projectName": "FirebirdWeb",
-      "projectPath": "C:\\Users\\sd01\\ProAccScanner\\FirebirdWeb.csproj",
-      "packagesPath": "C:\\Users\\sd01\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sd01\\ProAccScanner\\obj\\",
+      "projectPath": "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj",
+      "packagesPath": "C:\\Users\\sqlsupport\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\sqlsupport\\ProAccScanner\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\sd01\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\sqlsupport\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
-        "net6.0"
+        "net8.0"
       ],
       "sources": {
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net6.0": {
-          "targetAlias": "net6.0",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "projectReferences": {}
         }
       },
@@ -1716,8 +1716,8 @@
       "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
-      "net6.0": {
-        "targetAlias": "net6.0",
+      "net8.0": {
+        "targetAlias": "net8.0",
         "dependencies": {
           "BCrypt.Net-Next": {
             "target": "Package",
@@ -1755,7 +1755,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
