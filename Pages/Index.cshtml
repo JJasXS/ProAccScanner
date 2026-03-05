@@ -47,7 +47,12 @@
                 <div class="install-badge">Android · Chrome</div>
                 <ol>
                     <li>Tap the ⋮ More menu.</li>
-                    <li>Select <strong>Install App</strong>.</li>
+                    <li>
+                        Select
+                        <button type="button" id="installFromModalBtn" class="install-inline-btn">
+                            Add to home screen
+                        </button>
+                    </li>
                 </ol>
             </div>
 
@@ -70,6 +75,7 @@
 
     const modal = document.getElementById('installModal');
     const trigger = document.getElementById('installTrigger');
+    const installFromModalBtn = document.getElementById('installFromModalBtn');
     const body = document.body;
 
     if (!modal || !trigger) {
@@ -81,7 +87,8 @@
         const isIOS = /iphone|ipad|ipod/i.test(ua);
         const isWebKit = /webkit/i.test(ua);
         const isCriOS = /crios/i.test(ua);
-        return isIOS && isWebKit && !isCriOS;
+        const isFxiOS = /fxios/i.test(ua);
+        return isIOS && isWebKit && !isCriOS && !isFxiOS;
     };
 
     const updateInstallVisibility = () => {
@@ -112,9 +119,9 @@
         body.classList.remove('modal-open');
     };
 
-    const handleInstallClick = async () => {
+    const handleInstallClick = async (showFallbackModal = true) => {
         if (deferredPrompt) {
-            deferredPrompt.prompt();
+            await deferredPrompt.prompt();
             try {
                 const choice = await deferredPrompt.userChoice;
                 if (choice.outcome === 'accepted') {
@@ -124,11 +131,12 @@
             }
 
             deferredPrompt = null;
+            canInstall = false;
             updateInstallVisibility();
             return;
         }
 
-        if (!isInstalled) {
+        if (!isInstalled && showFallbackModal) {
             openModal();
         }
     };
@@ -152,6 +160,7 @@
     window.addEventListener('appinstalled', handleAppInstalled);
 
     trigger.addEventListener('click', handleInstallClick);
+    installFromModalBtn?.addEventListener('click', () => handleInstallClick(false));
     closeTargets.forEach((el) => el.addEventListener('click', closeModal));
 
     document.addEventListener('keydown', (evt) => {

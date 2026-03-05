@@ -230,6 +230,20 @@ body{
   margin-top: 4px;
 }
 
+.install-inline-btn{
+  border: none;
+  background: none;
+  color: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.install-inline-btn:hover{
+  color: inherit;
+}
+
 body.modal-open{
   overflow: hidden;
 }
