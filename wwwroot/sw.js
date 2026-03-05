@@ -3,7 +3,7 @@ const ASSETS_TO_CACHE = [
   '/',
   '/css/site.css',
   '/css/index.css',
-  '/images/logo.png'
+  '/images/logo.jpg'
 ];
 
 self.addEventListener('install', (event) => {
