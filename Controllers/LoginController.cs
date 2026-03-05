@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+
 using FirebirdWeb.Helpers;
 using FirebirdSql.Data.FirebirdClient;
+using Microsoft.AspNetCore.Authentication;
 
 namespace FirebirdWeb.Controllers
 {
@@ -146,6 +148,24 @@ namespace FirebirdWeb.Controllers
 
             if (!valid)
                 return Ok(new { success = false, message = "Invalid or expired OTP" });
+
+            // Set persistent authentication cookie (never expires, only logs out on explicit logout)
+            var claims = new List<System.Security.Claims.Claim>
+            {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, Email),
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, Email),
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Email)
+            };
+            var identity = new System.Security.Claims.ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+            HttpContext.SignInAsync(
+                Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme,
+                principal,
+                new Microsoft.AspNetCore.Authentication.AuthenticationProperties
+                {
+                    IsPersistent = true // persistent until logout
+                }
+            ).Wait();
 
             HttpContext.Session.SetString("UserEmail", Email);
 
