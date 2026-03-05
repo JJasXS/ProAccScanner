@@ -46,3 +46,8 @@ C:\Users\sqlsupport\ProAccScanner\obj\Debug\net8.0\refint\FirebirdWeb.dll
 C:\Users\sqlsupport\ProAccScanner\obj\Debug\net8.0\FirebirdWeb.pdb
 C:\Users\sqlsupport\ProAccScanner\obj\Debug\net8.0\FirebirdWeb.genruntimeconfig.cache
 C:\Users\sqlsupport\ProAccScanner\obj\Debug\net8.0\ref\FirebirdWeb.dll
+C:\Users\sqlsupport\ProAccScanner\bin\Debug\net8.0\publish\win-x64\web.config
+C:\Users\sqlsupport\ProAccScanner\bin\Debug\net8.0\publish\win-x64\appsettings.Development.json
+C:\Users\sqlsupport\ProAccScanner\bin\Debug\net8.0\publish\win-x64\appsettings.json
+C:\Users\sqlsupport\ProAccScanner\bin\Debug\net8.0\publish\win-x64\appsettings.Production.json
+C:\Users\sqlsupport\ProAccScanner\bin\Debug\net8.0\publish\win-x64\FirebirdWeb.staticwebassets.endpoints.json

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FirebirdWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+761e5c1811607cf3d327b080e7f7febdf6e56e2d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+685dc71cc891157ea3a8faf9bb62a8ac82758705")]
 [assembly: System.Reflection.AssemblyProductAttribute("FirebirdWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FirebirdWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

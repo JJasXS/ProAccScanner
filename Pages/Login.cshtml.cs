@@ -187,8 +187,7 @@ namespace FirebirdWeb.Pages
                 principal,
                 new AuthenticationProperties
                 {
-                    IsPersistent = true, // ✅ stays after closing browser
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+                    IsPersistent = true // stays after closing browser, uses global expiry
                 }
             );
 

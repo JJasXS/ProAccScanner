@@ -25,8 +25,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Login";
         options.LogoutPath = "/Logout";
 
-        options.ExpireTimeSpan = TimeSpan.FromDays(30);  // ✅ stay login 30 days
-        options.SlidingExpiration = true;                // ✅ extend when active
+        options.ExpireTimeSpan = TimeSpan.FromDays(36500);  // Effectively never expires (100 years)
+        options.SlidingExpiration = false;                 // No auto-expiry, only logout
 
         options.Cookie.HttpOnly = true;
         options.Cookie.IsEssential = true;
@@ -39,7 +39,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // ✅ Session (keep for OTP / your existing flow)
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromDays(36500); // Match cookie: 100 years
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 

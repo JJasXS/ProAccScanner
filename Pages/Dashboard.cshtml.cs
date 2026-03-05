@@ -14,36 +14,27 @@ namespace FirebirdWeb.Pages
 
         public IActionResult OnGet()
         {
-            // ✅ 1) Must be authenticated (cookie)
+            // 1) Must be authenticated (cookie only)
             if (!(User?.Identity?.IsAuthenticated ?? false))
                 return RedirectToPage("/Login");
 
-            // ✅ 2) Read from claims (cookie)
-            var claimEmail =
-                User.FindFirst(ClaimTypes.Email)?.Value
+            // 2) Always use claims for login info
+            UserEmail = User.FindFirst(ClaimTypes.Email)?.Value
                 ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? "";
-
-            var claimName =
-                User.FindFirst(ClaimTypes.Name)?.Value
+            UserName = User.FindFirst(ClaimTypes.Name)?.Value
                 ?? (User.Identity?.Name ?? "");
 
-            // ✅ 3) Read from session (if exists)
+            // 3) Optionally rebuild session for convenience (not required for login)
             var sessEmail = HttpContext.Session.GetString("UserEmail") ?? "";
             var sessName  = HttpContext.Session.GetString("UserName") ?? "";
-
-            // ✅ 4) Decide final values (prefer session if already set, otherwise claims)
-            UserEmail = !string.IsNullOrWhiteSpace(sessEmail) ? sessEmail : claimEmail;
-            UserName  = !string.IsNullOrWhiteSpace(sessName)  ? sessName  : claimName;
-
-            // ✅ 5) If session expired but cookie exists -> rebuild session
             if (string.IsNullOrWhiteSpace(sessEmail) && !string.IsNullOrWhiteSpace(UserEmail))
             {
                 HttpContext.Session.SetString("UserEmail", UserEmail);
                 HttpContext.Session.SetString("UserName", UserName ?? "");
             }
 
-            // ✅ 6) Safety: still no email => force login
+            // 4) If not authenticated, force login (should never hit here)
             if (string.IsNullOrWhiteSpace(UserEmail))
                 return RedirectToPage("/Login");
 
