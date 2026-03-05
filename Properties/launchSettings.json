@@ -13,10 +13,7 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "Index",
-  "notes": "Old: http://0.0.0.0:80",
-  "applicationUrl": "http://0.0.0.0:8443",
-
-
+      "applicationUrl": "http://localhost:5088",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

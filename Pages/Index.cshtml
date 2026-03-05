@@ -4,13 +4,10 @@
     ViewData["Title"] = "Welcome";
 }
 
-<link rel="stylesheet" href="~/css/index.css" />
+<link rel="stylesheet" href="~/css/index.css" asp-append-version="true" />
 
 <div class="landing-container">
-
-    <img src="@Url.Content("~/images/logo.png")" alt="Logo" class="landing-logo" />
-
-    <h1>JusPrint Scanning System</h1>
+    <h1>Scanner System</h1>
     <p>Click below to login:</p>
 
     <div class="btn-row">
@@ -21,13 +18,146 @@
 
     <hr />
 
-<!-- Managed by -->
-<div class="app-managed" style="margin-top:6px; font-size:12px; opacity:.75;">
-    Managed by ProAcc System Consulting
-</div>
+    <div class="app-managed" style="margin-top:6px; font-size:12px; opacity:.75;">
+        Managed by ProAcc System Consulting
+    </div>
 
-    <!-- Version text -->
+    <div class="install-cta">
+        <button type="button" id="installTrigger" class="install-link" aria-haspopup="dialog" aria-expanded="false">
+            <span class="install-icon">?</span>
+            Install app
+        </button>
+    </div>
+
     <div class="app-version" style="margin-top:12px; font-size:12px; opacity:.75;">
         V1.0
     </div>
 </div>
+
+<div id="installModal" class="install-modal" aria-hidden="true" hidden>
+    <div class="install-modal__backdrop" data-install-close></div>
+    <div class="install-modal__card" role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
+        <div class="install-modal__header">
+            <div id="installModalTitle">Install App</div>
+            <button type="button" class="install-modal__close" data-install-close aria-label="Close install instructions">×</button>
+        </div>
+
+        <div class="install-modal__body">
+            <div class="install-section">
+                <div class="install-badge">Android · Chrome</div>
+                <ol>
+                    <li>Tap the ⋮ More menu.</li>
+                    <li>Select <strong>Install App</strong>.</li>
+                </ol>
+            </div>
+
+            <div class="install-section">
+                <div class="install-badge">iOS · Safari</div>
+                <ol>
+                    <li>Tap <strong>Share</strong>.</li>
+                    <li>Choose <strong>Add to Home Screen</strong>.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    let deferredPrompt = null;
+    let canInstall = false;
+    let isInstalled = false;
+
+    const modal = document.getElementById('installModal');
+    const trigger = document.getElementById('installTrigger');
+    const body = document.body;
+
+    if (!modal || !trigger) {
+        return;
+    }
+
+    const isIosSafari = () => {
+        const ua = window.navigator.userAgent;
+        const isIOS = /iphone|ipad|ipod/i.test(ua);
+        const isWebKit = /webkit/i.test(ua);
+        const isCriOS = /crios/i.test(ua);
+        return isIOS && isWebKit && !isCriOS;
+    };
+
+    const updateInstallVisibility = () => {
+        const showInstall = !isInstalled;
+        trigger.hidden = !showInstall;
+    };
+
+    const standaloneDisplay = window.matchMedia('(display-mode: standalone)').matches;
+    const iosStandalone = window.navigator.standalone === true;
+    isInstalled = standaloneDisplay || iosStandalone;
+    updateInstallVisibility();
+
+    const closeTargets = modal.querySelectorAll('[data-install-close]');
+
+    const openModal = () => {
+        modal.hidden = false;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        trigger.setAttribute('aria-expanded', 'true');
+        body.classList.add('modal-open');
+    };
+
+    const closeModal = () => {
+        modal.hidden = true;
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
+        body.classList.remove('modal-open');
+    };
+
+    const handleInstallClick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            try {
+                const choice = await deferredPrompt.userChoice;
+                if (choice.outcome === 'accepted') {
+                    canInstall = false;
+                }
+            } catch (_) {
+            }
+
+            deferredPrompt = null;
+            updateInstallVisibility();
+            return;
+        }
+
+        if (!isInstalled) {
+            openModal();
+        }
+    };
+
+    const handleBeforeInstallPrompt = (event) => {
+        event.preventDefault();
+        deferredPrompt = event;
+        canInstall = true;
+        updateInstallVisibility();
+    };
+
+    const handleAppInstalled = () => {
+        isInstalled = true;
+        canInstall = false;
+        deferredPrompt = null;
+        closeModal();
+        updateInstallVisibility();
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    trigger.addEventListener('click', handleInstallClick);
+    closeTargets.forEach((el) => el.addEventListener('click', closeModal));
+
+    document.addEventListener('keydown', (evt) => {
+        if (evt.key === 'Escape') {
+            closeModal();
+        }
+    });
+})();
+</script>

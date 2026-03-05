@@ -115,6 +115,125 @@ body{
   background: var(--softHover);
 }
 
+.install-link{
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 7px 12px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.install-cta{
+  margin-top: 10px;
+}
+
+.install-link:hover{
+  color: #0f172a;
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.install-icon{
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.install-modal{
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.install-modal[aria-hidden="true"]{
+  display: none;
+}
+
+.install-modal__backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.install-modal__card{
+  position: relative;
+  width: min(92vw, 520px);
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  padding: 18px 20px;
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.25);
+  z-index: 1;
+  max-height: 82vh;
+  overflow: auto;
+}
+
+.install-modal__header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.install-modal__close{
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.install-modal__body{
+  text-align: left;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.install-section + .install-section{
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.install-badge{
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.install-section ol{
+  margin: 0 0 0 18px;
+  line-height: 1.5;
+}
+
+.install-section li + li{
+  margin-top: 4px;
+}
+
+body.modal-open{
+  overflow: hidden;
+}
+
 /* Divider */
 hr{
   margin-top: 18px;
