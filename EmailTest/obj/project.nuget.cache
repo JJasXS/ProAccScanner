@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "EW0Qfl6ZdpQ=",
+  "dgSpecHash": "edvJ88JaYSI=",
   "success": true,
-  "projectFilePath": "C:\\Users\\sd01\\ProAccScanner\\EmailTest\\EmailTest.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\sqlsupport\\ProAccScanner\\EmailTest\\EmailTest.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\sqlsupport\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.36\\microsoft.netcore.app.ref.6.0.36.nupkg.sha512",
+    "C:\\Users\\sqlsupport\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.36\\microsoft.windowsdesktop.app.ref.6.0.36.nupkg.sha512",
+    "C:\\Users\\sqlsupport\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.36\\microsoft.aspnetcore.app.ref.6.0.36.nupkg.sha512",
+    "C:\\Users\\sqlsupport\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\6.0.36\\microsoft.netcore.app.host.win-x64.6.0.36.nupkg.sha512"
+  ],
   "logs": []
 }

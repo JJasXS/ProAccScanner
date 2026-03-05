@@ -1,0 +1,15 @@
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\bin\Debug\net6.0\EmailTest.exe
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\bin\Debug\net6.0\EmailTest.deps.json
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\bin\Debug\net6.0\EmailTest.runtimeconfig.json
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\bin\Debug\net6.0\EmailTest.dll
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\bin\Debug\net6.0\EmailTest.pdb
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\EmailTest.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\EmailTest.AssemblyInfoInputs.cache
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\EmailTest.AssemblyInfo.cs
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\EmailTest.csproj.CoreCompileInputs.cache
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\EmailTest.sourcelink.json
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\EmailTest.dll
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\refint\EmailTest.dll
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\EmailTest.pdb
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\EmailTest.genruntimeconfig.cache
+C:\Users\sqlsupport\ProAccScanner\EmailTest\EmailTest\obj\Debug\net6.0\ref\EmailTest.dll

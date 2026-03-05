@@ -54,14 +54,25 @@
                         </button>
                     </li>
                 </ol>
+                <p id="androidInstallHint" class="install-hint" hidden>
+                    Native install prompt is not available yet. Use Chrome menu (⋮) and choose Add to home screen.
+                </p>
             </div>
 
             <div class="install-section">
                 <div class="install-badge">iOS · Safari</div>
                 <ol>
                     <li>Tap <strong>Share</strong>.</li>
-                    <li>Choose <strong>Add to Home Screen</strong>.</li>
+                    <li>
+                        Choose
+                        <button type="button" id="installFromIosBtn" class="install-inline-btn">
+                            Add to Home Screen
+                        </button>
+                    </li>
                 </ol>
+                <p id="iosInstallHint" class="install-hint" hidden>
+                    Safari cannot open the install prompt automatically. Tap Share, then Add to Home Screen to create the shortcut.
+                </p>
             </div>
         </div>
     </div>
@@ -76,6 +87,9 @@
     const modal = document.getElementById('installModal');
     const trigger = document.getElementById('installTrigger');
     const installFromModalBtn = document.getElementById('installFromModalBtn');
+    const installFromIosBtn = document.getElementById('installFromIosBtn');
+    const androidInstallHint = document.getElementById('androidInstallHint');
+    const iosInstallHint = document.getElementById('iosInstallHint');
     const body = document.body;
 
     if (!modal || !trigger) {
@@ -119,7 +133,27 @@
         body.classList.remove('modal-open');
     };
 
-    const handleInstallClick = async (showFallbackModal = true) => {
+    const openIosShareSheet = async () => {
+        if (!isIosSafari() || typeof navigator.share !== 'function') {
+            return false;
+        }
+
+        try {
+            await navigator.share({
+                title: document.title,
+                text: 'Open the Share menu and choose Add to Home Screen.',
+                url: window.location.href
+            });
+            return true;
+        } catch (_) {
+            return false;
+        }
+    };
+
+    const handleInstallClick = async (showFallbackModal = true, hintTarget = 'none') => {
+        if (androidInstallHint) androidInstallHint.hidden = true;
+        if (iosInstallHint) iosInstallHint.hidden = true;
+
         if (deferredPrompt) {
             await deferredPrompt.prompt();
             try {
@@ -138,6 +172,18 @@
 
         if (!isInstalled && showFallbackModal) {
             openModal();
+        }
+
+        if (!isInstalled && hintTarget === 'android' && androidInstallHint) {
+            androidInstallHint.hidden = false;
+        }
+
+        if (!isInstalled && hintTarget === 'ios' && iosInstallHint) {
+            const shareOpened = await openIosShareSheet();
+            iosInstallHint.textContent = shareOpened
+                ? 'Share menu opened. Tap Add to Home Screen to create the shortcut.'
+                : 'Safari cannot open the install prompt automatically. Tap Share, then Add to Home Screen to create the shortcut.';
+            iosInstallHint.hidden = false;
         }
     };
 
@@ -160,7 +206,8 @@
     window.addEventListener('appinstalled', handleAppInstalled);
 
     trigger.addEventListener('click', handleInstallClick);
-    installFromModalBtn?.addEventListener('click', () => handleInstallClick(false));
+    installFromModalBtn?.addEventListener('click', () => handleInstallClick(true, 'android'));
+    installFromIosBtn?.addEventListener('click', () => handleInstallClick(false, 'ios'));
     closeTargets.forEach((el) => el.addEventListener('click', closeModal));
 
     document.addEventListener('keydown', (evt) => {

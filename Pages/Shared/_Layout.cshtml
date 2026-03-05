@@ -3,12 +3,27 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/icons/apple-touch-icon.png" asp-append-version="true" />
     <title>@ViewData["Title"] - FirebirdWeb</title>
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="manifest" href="~/manifest.webmanifest" asp-append-version="true" />
     @RenderSection("Styles", required: false)
 </head>
 <body>
     @RenderBody()
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                });
+            });
+        }
+    </script>
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>

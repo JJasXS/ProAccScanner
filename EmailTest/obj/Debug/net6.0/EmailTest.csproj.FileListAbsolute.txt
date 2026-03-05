@@ -1,0 +1,5 @@
+C:\Users\sqlsupport\ProAccScanner\EmailTest\obj\Debug\net6.0\EmailTest.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sqlsupport\ProAccScanner\EmailTest\obj\Debug\net6.0\EmailTest.AssemblyInfoInputs.cache
+C:\Users\sqlsupport\ProAccScanner\EmailTest\obj\Debug\net6.0\EmailTest.AssemblyInfo.cs
+C:\Users\sqlsupport\ProAccScanner\EmailTest\obj\Debug\net6.0\EmailTest.csproj.CoreCompileInputs.cache
+C:\Users\sqlsupport\ProAccScanner\EmailTest\obj\Debug\net6.0\EmailTest.sourcelink.json
