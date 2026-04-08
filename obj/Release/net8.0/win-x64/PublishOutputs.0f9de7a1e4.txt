@@ -1,5 +1,0 @@
-C:\Users\sqlsupport\ProAccScanner\publish\win-x64\appsettings.Development.json
-C:\Users\sqlsupport\ProAccScanner\publish\win-x64\appsettings.json
-C:\Users\sqlsupport\ProAccScanner\publish\win-x64\appsettings.Production.json
-C:\Users\sqlsupport\ProAccScanner\publish\win-x64\FirebirdWeb.pdb
-C:\Users\sqlsupport\ProAccScanner\publish\win-x64\FirebirdWeb.exe

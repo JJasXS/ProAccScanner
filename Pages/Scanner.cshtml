@@ -37,13 +37,22 @@
         <!-- Left: Camera / scan -->
         <div class="scan-card">
             <div class="video-wrap" id="video-wrap">
-                <video id="scanner-video" autoplay playsinline></video>
+                <!-- No placeholder <video>: Quagga reuses the first video in this box; a hidden #scanner-video caused a blank preview. -->
                 <div class="video-hint">Point camera at barcode</div>
             </div>
 
             <div class="scan-top">
                 <button id="start-scanner" class="btn btn-primary" type="button">
                     Start Scanner
+                </button>
+            </div>
+
+            <div class="scan-toolbar" role="toolbar" aria-label="Scanner options">
+                <button type="button" id="orientation-btn" class="btn btn-outline btn-toolbar">
+                    Horizontal view
+                </button>
+                <button type="button" id="flash-btn" class="btn btn-outline btn-toolbar" disabled title="Requires rear camera with torch (mainly Android Chrome)">
+                    Flash off
                 </button>
             </div>
 
@@ -121,8 +130,9 @@
         // DOM
         // ----------------------------
         const startBtn = document.getElementById('start-scanner');
-        const video = document.getElementById('scanner-video');
         const videoWrap = document.getElementById('video-wrap');
+        const orientationBtn = document.getElementById('orientation-btn');
+        const flashBtn = document.getElementById('flash-btn');
         const scanResult = document.getElementById('scan-result');
 
         const locationInput = document.getElementById('location');
@@ -142,9 +152,107 @@
         // State
         // ----------------------------
         let scannerActive = false;
-        let stream = null;
         let lastScannedCode = "";
         let lastDetectedAt = 0;
+        let previewLandscape = false;
+        let flashOn = false;
+
+        /** 'native' = BarcodeDetector API (OS decoder on many Android Chrome phones); 'quagga' = in-browser library */
+        let scannerMode = null;
+        let nativeStream = null;
+        let nativeRafId = 0;
+        let nativeDetector = null;
+        let nativeDetectBusy = false;
+        let nativeLastScanAttempt = 0;
+
+        const ORIENTATION_STORAGE = "scanner-preview-landscape";
+
+        function getScannerVideoTrack() {
+            if (scannerMode === "native" && nativeStream) {
+                const tracks = nativeStream.getVideoTracks();
+                return tracks.length ? tracks[0] : null;
+            }
+            if (scannerMode === "quagga" && typeof Quagga !== "undefined" && Quagga.CameraAccess) {
+                return Quagga.CameraAccess.getActiveTrack();
+            }
+            return null;
+        }
+
+        function loadOrientationPreference() {
+            try {
+                previewLandscape = sessionStorage.getItem(ORIENTATION_STORAGE) === "1";
+            } catch (e) {
+                previewLandscape = false;
+            }
+            applyPreviewOrientation();
+        }
+
+        function applyPreviewOrientation() {
+            videoWrap.classList.toggle("video-wrap--landscape", previewLandscape);
+            orientationBtn.innerText = previewLandscape ? "Vertical view" : "Horizontal view";
+        }
+
+        async function setTorchEnabled(on) {
+            const track = getScannerVideoTrack();
+            if (!track || typeof track.applyConstraints !== "function") return false;
+            try {
+                const caps = typeof track.getCapabilities === "function" ? track.getCapabilities() : {};
+                if (caps.torch !== undefined) {
+                    await track.applyConstraints({ advanced: [{ torch: on }] });
+                    return true;
+                }
+                if (caps.fillLightMode && caps.fillLightMode.indexOf("flash") !== -1) {
+                    await track.applyConstraints({ advanced: [{ fillLightMode: on ? "flash" : "off" }] });
+                    return true;
+                }
+            } catch (e) {
+                console.warn("Torch not applied:", e);
+            }
+            return false;
+        }
+
+        function updateFlashUi() {
+            let canTorch = false;
+            if (scannerActive) {
+                const track = getScannerVideoTrack();
+                if (track && typeof track.getCapabilities === "function") {
+                    const caps = track.getCapabilities();
+                    canTorch = caps.torch !== undefined
+                        || (caps.fillLightMode && caps.fillLightMode.indexOf("flash") !== -1);
+                }
+            }
+            flashBtn.disabled = !scannerActive || !canTorch;
+            flashBtn.innerText = flashOn ? "Flash on" : "Flash off";
+            flashBtn.classList.toggle("btn-flash-active", flashOn);
+            if (!canTorch && scannerActive) {
+                flashBtn.title = "This device or browser does not expose a camera torch.";
+            } else {
+                flashBtn.title = "Toggle camera light (Android Chrome with rear camera; not available on most iPhones)";
+            }
+        }
+
+        loadOrientationPreference();
+
+        orientationBtn.addEventListener("click", () => {
+            previewLandscape = !previewLandscape;
+            try {
+                sessionStorage.setItem(ORIENTATION_STORAGE, previewLandscape ? "1" : "0");
+            } catch (e) { /* ignore */ }
+            applyPreviewOrientation();
+        });
+
+        flashBtn.addEventListener("click", async () => {
+            if (!scannerActive || flashBtn.disabled) return;
+            const next = !flashOn;
+            const ok = await setTorchEnabled(next);
+            if (ok) {
+                flashOn = next;
+            } else {
+                flashOn = false;
+                await setTorchEnabled(false);
+            }
+            updateFlashUi();
+        });
 
         // ----------------------------
         // Yes/No indicator
@@ -245,91 +353,211 @@
         // ----------------------------
         // Scanner control
         // ----------------------------
-        function stopScanner() {
-            try { Quagga.stop(); } catch (e) {}
-            if (stream) {
-                stream.getTracks().forEach(t => t.stop());
-                stream = null;
-            }
+        async function stopScanner() {
             scannerActive = false;
-            startBtn.innerText = "Start Scanner";
-            video.style.display = "none";
-        }
-
-        async function startScanner() {
-            video.style.display = "block";
-
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" }
-            });
-
-            video.srcObject = stream;
-            await video.play();
-
-            Quagga.init({
-                inputStream: {
-                    type: "LiveStream",
-                    target: videoWrap,
-                    constraints: {
-                        facingMode: "environment"
-                    }
-                },
-                locator: { patchSize: "medium", halfSample: true },
-                decoder: { readers: ["code_128_reader", "ean_reader"] }
-            }, (err) => {
-                if (err) {
-                    console.error(err);
-                    alert("Failed to start scanner.");
-                    stopScanner();
-                    return;
-                }
-                Quagga.start();
-                scannerActive = true;
-                startBtn.innerText = "Stop Scanner";
-            });
-        }
-
-        startBtn.addEventListener("click", async () => {
-            if (scannerActive) {
-                stopScanner();
-                return;
+            if (nativeRafId) {
+                cancelAnimationFrame(nativeRafId);
+                nativeRafId = 0;
             }
+            try {
+                await setTorchEnabled(false);
+            } catch (e) { /* ignore */ }
+            flashOn = false;
+            if (scannerMode === "native" && nativeStream) {
+                nativeStream.getTracks().forEach((t) => t.stop());
+                nativeStream = null;
+                nativeDetector = null;
+            }
+            if (scannerMode === "quagga") {
+                try { Quagga.stop(); } catch (e) {}
+            }
+            scannerMode = null;
+            nativeDetectBusy = false;
+            videoWrap.querySelectorAll("video, canvas, br[clear]").forEach((el) => {
+                el.remove();
+            });
+            startBtn.innerText = "Start Scanner";
+            updateFlashUi();
+        }
+
+        /**
+         * Prefer the browser BarcodeDetector API (often backed by the device/OS barcode engine on Android Chrome).
+         * Cannot open the separate system "Scan QR" app from a web page; this is the closest standard approach.
+         */
+        async function tryStartNativeBarcodeScanner() {
+            if (!("BarcodeDetector" in window)) return false;
+
+            let formats;
+            try {
+                const supported = await BarcodeDetector.getSupportedFormats();
+                const want = ["qr_code", "code_128", "ean_13", "ean_8", "code_39"];
+                formats = want.filter((f) => supported.indexOf(f) !== -1);
+                if (formats.length === 0) return false;
+            } catch (e) {
+                console.warn("BarcodeDetector.getSupportedFormats:", e);
+                return false;
+            }
+
+            let detector;
+            try {
+                detector = new BarcodeDetector({ formats: formats });
+            } catch (e) {
+                console.warn("BarcodeDetector constructor:", e);
+                return false;
+            }
+
+            const preferRearPhone = {
+                video: {
+                    width: { min: 320, ideal: 1280 },
+                    height: { min: 240, ideal: 720 },
+                    facingMode: { ideal: "environment" }
+                }
+            };
+            const anyCam = {
+                video: { width: { min: 320, ideal: 1280 }, height: { min: 240, ideal: 720 } }
+            };
+
+            let stream;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(preferRearPhone);
+            } catch (e1) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia(anyCam);
+                } catch (e2) {
+                    return false;
+                }
+            }
+
+            const video = document.createElement("video");
+            video.setAttribute("playsinline", "");
+            video.setAttribute("autoplay", "");
+            video.muted = true;
+            video.srcObject = stream;
+            videoWrap.appendChild(video);
 
             try {
-                await startScanner();
+                await video.play();
             } catch (e) {
-                console.error(e);
-                alert("Camera permission blocked / camera not available.");
-                stopScanner();
+                stream.getTracks().forEach((t) => t.stop());
+                video.remove();
+                return false;
             }
-        });
 
-        // ----------------------------
-        // Quagga detected
-        // ----------------------------
-        Quagga.onDetected((result) => {
+            nativeStream = stream;
+            nativeDetector = detector;
+            scannerMode = "native";
+
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const minMs = 220;
+
+            function nativeLoop() {
+                if (!scannerActive || scannerMode !== "native") return;
+                nativeRafId = requestAnimationFrame(nativeLoop);
+                if (nativeDetectBusy) return;
+                const t = Date.now();
+                if (t - nativeLastScanAttempt < minMs) return;
+                if (video.readyState < 2) return;
+                const w = video.videoWidth;
+                const h = video.videoHeight;
+                if (w < 8 || h < 8) return;
+
+                nativeLastScanAttempt = t;
+                nativeDetectBusy = true;
+                canvas.width = w;
+                canvas.height = h;
+                ctx.drawImage(video, 0, 0);
+                nativeDetector.detect(canvas).then((codes) => {
+                    nativeDetectBusy = false;
+                    if (!scannerActive || scannerMode !== "native" || !codes || codes.length === 0) return;
+                    const raw = codes[0].rawValue != null ? codes[0].rawValue : codes[0].value;
+                    if (raw == null || raw === "") return;
+                    void processScannedCode(String(raw).trim());
+                }).catch(() => {
+                    nativeDetectBusy = false;
+                });
+            }
+
+            scannerActive = true;
+            startBtn.innerText = "Stop Scanner";
+            flashOn = false;
+            nativeRafId = requestAnimationFrame(nativeLoop);
+            requestAnimationFrame(() => updateFlashUi());
+            setTimeout(() => updateFlashUi(), 400);
+            return true;
+        }
+
+        /** One camera stream for both preview and barcode decode, rendered inside the scanner box. */
+        function initQuaggaWithConstraints(constraints) {
+            return new Promise((resolve, reject) => {
+                Quagga.init({
+                    inputStream: {
+                        type: "LiveStream",
+                        target: videoWrap,
+                        constraints: constraints
+                    },
+                    locator: { patchSize: "medium", halfSample: true },
+                    decoder: { readers: ["code_128_reader", "ean_reader"] }
+                }, (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+        }
+
+        async function startQuaggaScanner() {
+            const preferRearPhone = {
+                width: { min: 320, ideal: 1280 },
+                height: { min: 240, ideal: 720 },
+                facingMode: { ideal: "environment" }
+            };
+            const anyWebcam = {
+                width: { min: 320, ideal: 1280 },
+                height: { min: 240, ideal: 720 }
+            };
+
+            try {
+                try {
+                    await initQuaggaWithConstraints(preferRearPhone);
+                } catch (e1) {
+                    console.warn("Scanner: rear camera preference unavailable, using default camera.", e1);
+                    try { Quagga.stop(); } catch (e) {}
+                    await initQuaggaWithConstraints(anyWebcam);
+                }
+                Quagga.start();
+                scannerMode = "quagga";
+                scannerActive = true;
+                startBtn.innerText = "Stop Scanner";
+                flashOn = false;
+                requestAnimationFrame(() => updateFlashUi());
+                setTimeout(() => updateFlashUi(), 400);
+            } catch (err) {
+                console.error(err);
+                alert("Failed to start scanner.");
+                await stopScanner();
+            }
+        }
+
+        async function processScannedCode(scannedCode) {
             const now = Date.now();
             if (now - lastDetectedAt < 1200) return;
             lastDetectedAt = now;
-
-            const scannedCode = result?.codeResult?.code || "";
             if (!scannedCode) return;
 
             lastScannedCode = scannedCode;
-
             scanResult.innerText = "Scanned: " + scannedCode;
             locationInput.value = "";
             updateBtn.disabled = true;
 
-            stopScanner();
+            await stopScanner();
 
-            fetch('/api/scanner/validate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            fetch("/api/scanner/validate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code: scannedCode })
             })
-            .then(res => res.json())
-            .then(data => {
+            .then((res) => res.json())
+            .then((data) => {
                 if (!data.success) {
                     alert("Error: " + (data.message || "Unknown error"));
                     return;
@@ -337,12 +565,9 @@
 
                 if (data.exists) {
                     locationInput.value = (data.location || "").trim();
-
                     setConfirmSelected("yes");
-
                     manualContainer.style.display = "none";
                     manualInput.value = "";
-
                     updateBtn.disabled = !lastScannedCode;
                 } else {
                     clearConfirmSelected();
@@ -351,10 +576,50 @@
                     alert(data.message || "Code not found.");
                 }
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error(err);
                 alert("Error validating code! Check console.");
             });
+        }
+
+        async function startScanner() {
+            try {
+                const nativeOk = await tryStartNativeBarcodeScanner();
+                if (nativeOk) {
+                    console.info("Scanner: using device BarcodeDetector (fast / OS-backed where supported).");
+                    return;
+                }
+                console.info("Scanner: BarcodeDetector unavailable; using library camera decoder (Quagga).");
+                await startQuaggaScanner();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to start scanner.");
+                await stopScanner();
+            }
+        }
+
+        startBtn.addEventListener("click", async () => {
+            if (scannerActive) {
+                await stopScanner();
+                return;
+            }
+
+            try {
+                await startScanner();
+            } catch (e) {
+                console.error(e);
+                alert("Camera permission blocked / camera not available.");
+                await stopScanner();
+            }
+        });
+
+        // ----------------------------
+        // Quagga detected
+        // ----------------------------
+        Quagga.onDetected((result) => {
+            const scannedCode = result?.codeResult?.code || "";
+            if (!scannedCode) return;
+            void processScannedCode(scannedCode);
         });
 
         // ----------------------------
