@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj": {}
+    "C:\\Users\\sd01\\ProAccScanner\\FirebirdWeb.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj": {
+    "C:\\Users\\sd01\\ProAccScanner\\FirebirdWeb.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj",
+        "projectUniqueName": "C:\\Users\\sd01\\ProAccScanner\\FirebirdWeb.csproj",
         "projectName": "FirebirdWeb",
-        "projectPath": "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj",
-        "packagesPath": "C:\\Users\\sqlsupport\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sqlsupport\\ProAccScanner\\obj\\",
+        "projectPath": "C:\\Users\\sd01\\ProAccScanner\\FirebirdWeb.csproj",
+        "packagesPath": "C:\\Users\\sd01\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sd01\\ProAccScanner\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\sqlsupport\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\sd01\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -72,6 +72,24 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.23, 8.0.23]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[8.0.23, 8.0.23]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.23, 8.0.23]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.23, 8.0.23]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -80,7 +98,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
