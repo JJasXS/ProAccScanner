@@ -98,11 +98,13 @@ VALUES ('{safeCode}', '{safeItemDesc}')
                 }
                 // else: already exists -> skip insert, continue
 
-                // ✅ STEP 2: Optional - get latest location code from ST_ITEM_TPLDTL
+                // ✅ STEP 2: Optional - get latest location code and project from ST_ITEM_TPLDTL
                 string locationCode = "";
+                string project = "";
                 string dtlSql = $@"
 SELECT FIRST 1
-    TRIM(COALESCE(D.LOCATION, '')) AS LOCATION_CODE
+    TRIM(COALESCE(D.LOCATION, '')) AS LOCATION_CODE,
+    TRIM(COALESCE(D.PROJECT, '')) AS PROJECT
 FROM ST_ITEM_TPLDTL D
 WHERE UPPER(TRIM(D.CODE)) = '{safeCode}'
    OR UPPER(TRIM(D.ITEMCODE)) = '{safeCode}'
@@ -110,10 +112,12 @@ ORDER BY D.DTLKEY DESC
 ";
                 var dtlRows = _dbHelper.ExecuteSelect(dtlSql);
 
-                if (dtlRows != null && dtlRows.Count > 0 &&
-                    dtlRows[0].ContainsKey("LOCATION_CODE") && dtlRows[0]["LOCATION_CODE"] != null)
+                if (dtlRows != null && dtlRows.Count > 0)
                 {
-                    locationCode = dtlRows[0]["LOCATION_CODE"].ToString()?.Trim() ?? "";
+                    if (dtlRows[0].ContainsKey("LOCATION_CODE") && dtlRows[0]["LOCATION_CODE"] != null)
+                        locationCode = dtlRows[0]["LOCATION_CODE"].ToString()?.Trim() ?? "";
+                    if (dtlRows[0].ContainsKey("PROJECT") && dtlRows[0]["PROJECT"] != null)
+                        project = dtlRows[0]["PROJECT"].ToString()?.Trim() ?? "";
                 }
 
                 // ✅ STEP 3: Optional - translate location code -> location description
@@ -141,9 +145,10 @@ WHERE UPPER(TRIM(L.CODE)) = UPPER('{safeLoc}')
                 {
                     success = true,
                     exists = true,
-                    description = itemDesc,      // optional debug/info for UI
-                    locationCode,               // may be ""
-                    location = locationDesc     // may be ""
+                    description = itemDesc,
+                    locationCode,
+                    location = locationDesc,
+                    project
                 });
             }
             catch (Exception ex)

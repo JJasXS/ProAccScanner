@@ -79,6 +79,12 @@
                 <select id="manual-location"></select>
             </div>
 
+
+            <div class="section">
+                <label for="project">Project</label>
+                <input type="text" id="project" readonly placeholder="Auto-filled from scan" />
+            </div>
+
             <div class="section">
                 <label>Remarks</label>
                 <input type="text" id="remark1" placeholder="Remark 1" />
@@ -145,6 +151,7 @@
         const remark1Input = document.getElementById('remark1');
         const remark2Input = document.getElementById('remark2');
         const remark3Input = document.getElementById('remark3');
+        const projectInput = document.getElementById('project');
 
         const updateBtn = document.getElementById('update-btn');
 
@@ -337,6 +344,7 @@
             remark1Input.value = "";
             remark2Input.value = "";
             remark3Input.value = "";
+            projectInput.value = "";
 
             manualContainer.style.display = "none";
             manualInput.innerHTML = "";
@@ -565,6 +573,7 @@
 
                 if (data.exists) {
                     locationInput.value = (data.location || "").trim();
+                    projectInput.value = (data.project || "").trim();
                     setConfirmSelected("yes");
                     manualContainer.style.display = "none";
                     manualInput.value = "";

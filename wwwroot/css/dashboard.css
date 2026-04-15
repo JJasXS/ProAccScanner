@@ -20,12 +20,20 @@ html, body {
 /* ----------------------------
    Top bar
 ---------------------------- */
+
 .top-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  margin-bottom:12px;
+  margin-bottom:28px; /* Increased spacing below Dashboard */
+}
+.welcome-row {
+  margin-bottom: 28px; /* Space below Welcome section */
+}
+
+.dashboard-cards {
+  margin-bottom: 28px; /* Space below Scanner card if more sections are added later */
 }
 
 .top-title{
