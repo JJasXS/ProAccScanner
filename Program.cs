@@ -51,6 +51,11 @@ builder.Services.AddSession(options =>
 builder.Services.AddSingleton<EmailHelper>();
 builder.Services.AddSingleton<DbHelper>();
 
+// Keygen license validation
+builder.Services.Configure<FirebirdWeb.Models.KeygenSettings>(
+    builder.Configuration.GetSection("KeygenSettings"));
+builder.Services.AddHttpClient<FirebirdWeb.Helpers.KeygenService>();
+
 var app = builder.Build();
 
 // ----------------------------
@@ -72,6 +77,42 @@ app.UseRouting();
 
 // ✅ IMPORTANT ORDER:
 app.UseSession();          // keep for OTP
+
+// Activation gate: require successful Keygen activation before entering app.
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path;
+
+    if (path.StartsWithSegments("/Activate", StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWithSegments("/Error", StringComparison.OrdinalIgnoreCase))
+    {
+        await next();
+        return;
+    }
+
+    var activated = string.Equals(
+        context.Session.GetString("LicenseActivated"),
+        "true",
+        StringComparison.OrdinalIgnoreCase
+    );
+
+    if (activated)
+    {
+        await next();
+        return;
+    }
+
+    if (path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync("{\"success\":false,\"message\":\"Activation required.\"}");
+        return;
+    }
+
+    context.Response.Redirect("/Activate");
+});
+
 app.UseAuthentication();   // ✅ MUST be before authorization
 app.UseAuthorization();
 

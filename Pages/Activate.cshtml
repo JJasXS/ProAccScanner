@@ -1,0 +1,25 @@
+@page
+@model FirebirdWeb.Pages.ActivateModel
+@{
+    ViewData["Title"] = "Activation Required";
+}
+
+<link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+
+<div class="login-card" style="max-width: 520px; margin: 40px auto;">
+    <h2>Activate System</h2>
+    <p style="opacity:.8;">Enter your activation code to unlock the app.</p>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" style="margin-bottom: 12px;">@Model.ErrorMessage</div>
+    }
+
+    <form method="post" autocomplete="off">
+        <div style="margin-bottom: 12px;">
+            <input asp-for="LicenseKey" type="text" placeholder="Activation Code" required style="width:100%;" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;">Activate</button>
+    </form>
+</div>

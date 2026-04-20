@@ -10,14 +10,16 @@ namespace FirebirdWeb.Controllers
     public class RegistrationController : ControllerBase
     {
         private readonly DbHelper _dbHelper;
+        private readonly KeygenService _keygenService;
 
-        public RegistrationController(DbHelper dbHelper)
+        public RegistrationController(DbHelper dbHelper, KeygenService keygenService)
         {
             _dbHelper = dbHelper;
+            _keygenService = keygenService;
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromForm] RegistrationRequest request)
+        public async Task<IActionResult> Register([FromForm] RegistrationRequest request)
         {
             try
             {
@@ -34,8 +36,16 @@ namespace FirebirdWeb.Controllers
                 if (string.IsNullOrWhiteSpace(request.Passwd))
                     return BadRequest(new { success = false, error = "Password is required" });
 
+                if (string.IsNullOrWhiteSpace(request.LicenseKey))
+                    return BadRequest(new { success = false, error = "Activation code is required" });
+
                 if (request.Passwd.Length < 6)
                     return BadRequest(new { success = false, error = "Password must be at least 6 characters" });
+
+                // Validate activation code with Keygen before creating user
+                var (licenseValid, licenseMessage, _) = await _keygenService.ValidateLicenseAsync(request.LicenseKey);
+                if (!licenseValid)
+                    return BadRequest(new { success = false, error = $"Activation failed: {licenseMessage}" });
 
                 // Check if CODE already exists
                 var codeCheck = _dbHelper.ExecuteSelect($"SELECT CODE FROM SY_USER WHERE CODE = '{EscapeSQL(request.Code)}'");
