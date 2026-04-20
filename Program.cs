@@ -3,6 +3,7 @@ using FirebirdWeb.Helpers;
 
 using Microsoft.AspNetCore.Authentication.Cookies; // ✅ Cookie auth
 using Microsoft.AspNetCore.Http;                   // ✅ SameSiteMode
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,14 @@ builder.Host.UseWindowsService();
 // ----------------------------
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                               ForwardedHeaders.XForwardedProto |
+                               ForwardedHeaders.XForwardedHost;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 // ✅ REQUIRED: Session needs a cache store
 builder.Services.AddDistributedMemoryCache();
@@ -50,6 +59,7 @@ builder.Services.AddSession(options =>
 // Helpers
 builder.Services.AddSingleton<EmailHelper>();
 builder.Services.AddSingleton<DbHelper>();
+builder.Services.AddSingleton<ActivationState>();
 
 // Keygen license validation
 builder.Services.Configure<FirebirdWeb.Models.KeygenSettings>(
@@ -57,6 +67,7 @@ builder.Services.Configure<FirebirdWeb.Models.KeygenSettings>(
 builder.Services.AddHttpClient<FirebirdWeb.Helpers.KeygenService>();
 
 var app = builder.Build();
+app.UseForwardedHeaders();
 
 // ----------------------------
 // Pipeline
@@ -77,6 +88,7 @@ app.UseSession();          // keep for OTP
 // Activation gate: require successful Keygen activation before entering app.
 app.Use(async (context, next) =>
 {
+    var activationState = context.RequestServices.GetRequiredService<ActivationState>();
     var path = context.Request.Path;
 
     if (path.StartsWithSegments("/Activate", StringComparison.OrdinalIgnoreCase) ||
@@ -90,7 +102,7 @@ app.Use(async (context, next) =>
         context.Session.GetString("LicenseActivated"),
         "true",
         StringComparison.OrdinalIgnoreCase
-    );
+    ) || activationState.IsActivated();
 
     if (activated)
     {

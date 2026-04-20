@@ -7,10 +7,12 @@ namespace FirebirdWeb.Pages
     public class ActivateModel : PageModel
     {
         private readonly KeygenService _keygenService;
+        private readonly ActivationState _activationState;
 
-        public ActivateModel(KeygenService keygenService)
+        public ActivateModel(KeygenService keygenService, ActivationState activationState)
         {
             _keygenService = keygenService;
+            _activationState = activationState;
         }
 
         [BindProperty]
@@ -20,7 +22,8 @@ namespace FirebirdWeb.Pages
 
         public IActionResult OnGet()
         {
-            var activated = string.Equals(HttpContext.Session.GetString("LicenseActivated"), "true", StringComparison.OrdinalIgnoreCase);
+            var activated = string.Equals(HttpContext.Session.GetString("LicenseActivated"), "true", StringComparison.OrdinalIgnoreCase)
+                            || _activationState.IsActivated();
             if (activated)
                 return RedirectToPage("/Index");
 
@@ -45,6 +48,7 @@ namespace FirebirdWeb.Pages
             }
 
             HttpContext.Session.SetString("LicenseActivated", "true");
+            _activationState.MarkActivated();
             return RedirectToPage("/Index");
         }
     }
