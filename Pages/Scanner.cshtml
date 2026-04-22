@@ -82,7 +82,12 @@
 
             <div class="section">
                 <label for="project">Project</label>
-                <input type="text" id="project" readonly placeholder="Auto-filled from scan" />
+                <input type="text" id="project" readonly placeholder="Department" />
+            </div>
+
+            <div class="section">
+                <label for="last-scanned">Last Scanned Date</label>
+                <input type="text" id="last-scanned" readonly placeholder="Last Scanned Date" />
             </div>
 
             <div class="section">
@@ -152,6 +157,7 @@
         const remark2Input = document.getElementById('remark2');
         const remark3Input = document.getElementById('remark3');
         const projectInput = document.getElementById('project');
+        const lastScannedInput = document.getElementById('last-scanned');
 
         const updateBtn = document.getElementById('update-btn');
 
@@ -345,6 +351,7 @@
             remark2Input.value = "";
             remark3Input.value = "";
             projectInput.value = "";
+            lastScannedInput.value = "";
 
             manualContainer.style.display = "none";
             manualInput.innerHTML = "";
@@ -574,6 +581,7 @@
                 if (data.exists) {
                     locationInput.value = (data.location || "").trim();
                     projectInput.value = (data.project || "").trim();
+                    lastScannedInput.value = (data.lastScanned || "").trim();
                     setConfirmSelected("yes");
                     manualContainer.style.display = "none";
                     manualInput.value = "";

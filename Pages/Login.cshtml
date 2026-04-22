@@ -92,7 +92,11 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
 document.querySelectorAll('.otp').forEach((input, idx, arr) => {
     input.addEventListener('input', () => {
         input.value = input.value.replace(/[^0-9]/g, '');
-        if (input.value && idx < arr.length - 1) arr[idx + 1].focus();
+        if (input.value && idx < arr.length - 1) {
+            arr[idx + 1].focus();
+        } else if (input.value && idx === arr.length - 1) {
+            document.getElementById('verifyBtn').click();
+        }
     });
 
     input.addEventListener('keydown', (e) => {

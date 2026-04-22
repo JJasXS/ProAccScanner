@@ -1,6 +1,5 @@
 using System;
 using FirebirdWeb.Helpers;
-
 using Microsoft.AspNetCore.Authentication.Cookies; // ✅ Cookie auth
 using Microsoft.AspNetCore.Http;                   // ✅ SameSiteMode
 
@@ -77,5 +76,9 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
+
+// ✅ Ensure DB triggers exist (idempotent — safe to run every startup)
+var dbHelper = app.Services.GetRequiredService<DbHelper>();
+DbInitializer.EnsureTriggers(dbHelper);
 
 app.Run();

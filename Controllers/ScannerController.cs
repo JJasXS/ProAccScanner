@@ -120,6 +120,21 @@ ORDER BY D.DTLKEY DESC
                         project = dtlRows[0]["PROJECT"].ToString()?.Trim() ?? "";
                 }
 
+                // ✅ STEP 2.5: Get UDF_LASTSCANNED from ST_ITEM_TPL
+                string lastScanned = "";
+                string tplDateSql = $@"
+SELECT FIRST 1
+    COALESCE(CAST(T.UDF_LASTSCANNED AS VARCHAR(30)), '') AS UDF_LASTSCANNED
+FROM ST_ITEM_TPL T
+WHERE UPPER(TRIM(T.CODE)) = '{safeCode}'
+";
+                var tplDateRows = _dbHelper.ExecuteSelect(tplDateSql);
+                if (tplDateRows != null && tplDateRows.Count > 0 &&
+                    tplDateRows[0].ContainsKey("UDF_LASTSCANNED") && tplDateRows[0]["UDF_LASTSCANNED"] != null)
+                {
+                    lastScanned = tplDateRows[0]["UDF_LASTSCANNED"].ToString()?.Trim() ?? "";
+                }
+
                 // ✅ STEP 3: Optional - translate location code -> location description
                 string locationDesc = "";
                 if (!string.IsNullOrWhiteSpace(locationCode))
@@ -148,7 +163,8 @@ WHERE UPPER(TRIM(L.CODE)) = UPPER('{safeLoc}')
                     description = itemDesc,
                     locationCode,
                     location = locationDesc,
-                    project
+                    project,
+                    lastScanned
                 });
             }
             catch (Exception ex)
