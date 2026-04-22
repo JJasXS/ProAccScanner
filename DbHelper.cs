@@ -17,10 +17,10 @@ namespace FirebirdWeb.Helpers
         
         //SQL's connection (got locaiton data)
         
-   _connectionString = @"User=SYSDBA;Password=masterkey;Database=localhost:C:\eStream\SQLAccounting\DB\ACC-PROACC202601.FDB;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
+   //_connectionString = @"User=SYSDBA;Password=masterkey;Database=localhost:C:\eStream\SQLAccounting\DB\ACC-PROACC202601.FDB;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
         
               
-//         _connectionString = @"User=SYSDBA;Password=masterkey;Database=localhost:C:\eStream\SQLAccounting\DB\ACC-JUSTPRINT-V5-202604.FDB;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
+         _connectionString = @"User=SYSDBA;Password=masterkey;Database=localhost:C:\eStream\SQLAccounting\DB\ACC-JUSTPRINT-V5-202604.FDB;Port=3050;Dialect=3;Charset=UTF8;Pooling=true;";
         
         
         
