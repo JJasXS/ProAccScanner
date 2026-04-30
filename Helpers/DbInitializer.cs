@@ -18,8 +18,8 @@ namespace FirebirdWeb.Helpers
             const string triggerName = "TRG_LASTSCANNED_AFTER_INSERT";
 
             // Firebird DDL for the trigger.
-            // After every INSERT into ST_ITEM_TPLDTL, copy UDF_DATETIME -> ST_ITEM_TPL.UDF_LASTSCANNED
-            // for the matching CODE row.
+            // After every INSERT into ST_ITEM_TPLDTL, copy the scanner date to
+            // ST_ITEM_TPL.UDF_LASTSCANNED for the matching CODE row.
             const string createTriggerSql = @"
 CREATE OR ALTER TRIGGER TRG_LASTSCANNED_AFTER_INSERT
 ACTIVE AFTER INSERT ON ST_ITEM_TPLDTL
@@ -28,7 +28,7 @@ AS
 BEGIN
   IF (NEW.UDF_DATETIME IS NOT NULL) THEN
     UPDATE ST_ITEM_TPL
-    SET UDF_LASTSCANNED = NEW.UDF_DATETIME
+    SET UDF_LASTSCANNED = CAST(SUBSTRING(NEW.UDF_DATETIME FROM 1 FOR 10) AS DATE)
     WHERE UPPER(TRIM(CODE)) = UPPER(TRIM(NEW.CODE));
 END";
 

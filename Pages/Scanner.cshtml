@@ -714,7 +714,8 @@
             .then(res => res.json())
             .then(data => {
                 if (!data.success) {
-                    alert("Insert failed: " + (data.message || "Unknown error"));
+                    const detail = data.detail ? "\n\nDetail: " + data.detail : "";
+                    alert("Insert failed: " + (data.message || "Unknown error") + detail);
                     return;
                 }
 

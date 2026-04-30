@@ -304,7 +304,7 @@ WHERE UPPER(TRIM(DESCRIPTION)) = UPPER('{safeLocDesc}')
                 string safeRemark2 = EscapeSQL(remark2);
                 string safeRemark3 = EscapeSQL(remark3);
 
-                string nowStr = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                string nowStr = DateTime.Now.ToString("yyyy-MM-dd");
                 string safeNowStr = EscapeSQL(nowStr);
 
                 string safeUser = EscapeSQL(sessionUser);
@@ -314,7 +314,7 @@ WHERE UPPER(TRIM(DESCRIPTION)) = UPPER('{safeLocDesc}')
                 // - CODE, ITEMCODE, DESCRIPTION
                 // - LOCATION (location CODE)
                 // - remarks
-                // - datetime + user
+                // - scan date + user
                 string insertSql = $@"
 INSERT INTO ST_ITEM_TPLDTL
     (DTLKEY, CODE, ITEMCODE, DESCRIPTION, LOCATION, REMARK1, REMARK2, UDF_REMARK3, UDF_DATETIME, UDF_USER)
