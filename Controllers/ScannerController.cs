@@ -101,10 +101,12 @@ VALUES ('{safeCode}', '{safeItemDesc}')
                 // ✅ STEP 2: Optional - get latest location code and project from ST_ITEM_TPLDTL
                 string locationCode = "";
                 string project = "";
+                string lastScanned = "";
                 string dtlSql = $@"
 SELECT FIRST 1
     TRIM(COALESCE(D.LOCATION, '')) AS LOCATION_CODE,
-    TRIM(COALESCE(D.PROJECT, '')) AS PROJECT
+    TRIM(COALESCE(D.PROJECT, '')) AS PROJECT,
+    TRIM(COALESCE(D.UDF_DATETIME, '')) AS LAST_SCANNED
 FROM ST_ITEM_TPLDTL D
 WHERE UPPER(TRIM(D.CODE)) = '{safeCode}'
    OR UPPER(TRIM(D.ITEMCODE)) = '{safeCode}'
@@ -118,21 +120,25 @@ ORDER BY D.DTLKEY DESC
                         locationCode = dtlRows[0]["LOCATION_CODE"].ToString()?.Trim() ?? "";
                     if (dtlRows[0].ContainsKey("PROJECT") && dtlRows[0]["PROJECT"] != null)
                         project = dtlRows[0]["PROJECT"].ToString()?.Trim() ?? "";
+                    if (dtlRows[0].ContainsKey("LAST_SCANNED") && dtlRows[0]["LAST_SCANNED"] != null)
+                        lastScanned = dtlRows[0]["LAST_SCANNED"].ToString()?.Trim() ?? "";
                 }
 
-                // ✅ STEP 2.5: Get UDF_LASTSCANNED from ST_ITEM_TPL
-                string lastScanned = "";
-                string tplDateSql = $@"
+                // ✅ STEP 2.5: Fallback to ST_ITEM_TPL.UDF_LASTSCANNED if no detail datetime exists
+                if (string.IsNullOrWhiteSpace(lastScanned))
+                {
+                    string tplDateSql = $@"
 SELECT FIRST 1
     COALESCE(CAST(T.UDF_LASTSCANNED AS VARCHAR(30)), '') AS UDF_LASTSCANNED
 FROM ST_ITEM_TPL T
 WHERE UPPER(TRIM(T.CODE)) = '{safeCode}'
 ";
-                var tplDateRows = _dbHelper.ExecuteSelect(tplDateSql);
-                if (tplDateRows != null && tplDateRows.Count > 0 &&
-                    tplDateRows[0].ContainsKey("UDF_LASTSCANNED") && tplDateRows[0]["UDF_LASTSCANNED"] != null)
-                {
-                    lastScanned = tplDateRows[0]["UDF_LASTSCANNED"].ToString()?.Trim() ?? "";
+                    var tplDateRows = _dbHelper.ExecuteSelect(tplDateSql);
+                    if (tplDateRows != null && tplDateRows.Count > 0 &&
+                        tplDateRows[0].ContainsKey("UDF_LASTSCANNED") && tplDateRows[0]["UDF_LASTSCANNED"] != null)
+                    {
+                        lastScanned = tplDateRows[0]["UDF_LASTSCANNED"].ToString()?.Trim() ?? "";
+                    }
                 }
 
                 // ✅ STEP 3: Optional - translate location code -> location description
@@ -304,7 +310,7 @@ WHERE UPPER(TRIM(DESCRIPTION)) = UPPER('{safeLocDesc}')
                 string safeRemark2 = EscapeSQL(remark2);
                 string safeRemark3 = EscapeSQL(remark3);
 
-                string nowStr = DateTime.Now.ToString("yyyy-MM-dd");
+                string nowStr = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 string safeNowStr = EscapeSQL(nowStr);
 
                 string safeUser = EscapeSQL(sessionUser);
@@ -314,7 +320,7 @@ WHERE UPPER(TRIM(DESCRIPTION)) = UPPER('{safeLocDesc}')
                 // - CODE, ITEMCODE, DESCRIPTION
                 // - LOCATION (location CODE)
                 // - remarks
-                // - scan date + user
+                // - scan datetime + user
                 string insertSql = $@"
 INSERT INTO ST_ITEM_TPLDTL
     (DTLKEY, CODE, ITEMCODE, DESCRIPTION, LOCATION, REMARK1, REMARK2, UDF_REMARK3, UDF_DATETIME, UDF_USER)
