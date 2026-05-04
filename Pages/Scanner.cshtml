@@ -166,6 +166,8 @@
         // ----------------------------
         let scannerActive = false;
         let lastScannedCode = "";
+        /** From last /api/scanner/validate — used when LOCATION has a code but no description in ST_LOCATION, or as insert fallback. */
+        let lastResolvedLocationCode = "";
         let lastDetectedAt = 0;
         let previewLandscape = false;
         let flashOn = false;
@@ -360,6 +362,7 @@
             clearConfirmSelected();
 
             lastScannedCode = "";
+            lastResolvedLocationCode = "";
             updateBtn.disabled = true;
 
             if (!scannerActive) startBtn.click();
@@ -560,6 +563,7 @@
             if (!scannedCode) return;
 
             lastScannedCode = scannedCode;
+            lastResolvedLocationCode = "";
             scanResult.innerText = "Scanned: " + scannedCode;
             locationInput.value = "";
             updateBtn.disabled = true;
@@ -579,13 +583,24 @@
                 }
 
                 if (data.exists) {
-                    locationInput.value = (data.location || "").trim();
-                    projectInput.value = (data.project || "").trim();
-                    lastScannedInput.value = (data.lastScanned || "").trim();
-                    setConfirmSelected("yes");
+                    const locDesc = (data.location != null ? String(data.location) : "").trim();
+                    lastResolvedLocationCode = (data.locationCode != null ? String(data.locationCode) : "").trim();
+                    // Only show description here — lookup on save is by DESCRIPTION; code fallback is sent separately.
+                    locationInput.value = locDesc;
+                    projectInput.value = (data.project != null ? String(data.project) : "").trim();
+                    lastScannedInput.value = (data.lastScanned != null ? String(data.lastScanned) : "").trim();
                     manualContainer.style.display = "none";
                     manualInput.value = "";
-                    updateBtn.disabled = !lastScannedCode;
+
+                    const canConfirmCurrentLocation = locDesc.length > 0 || lastResolvedLocationCode.length > 0;
+                    if (!canConfirmCurrentLocation) {
+                        // First scan (no TPLDTL history): must pick location via "No" — do not enable Update with empty location.
+                        clearConfirmSelected();
+                        updateBtn.disabled = true;
+                    } else {
+                        setConfirmSelected("yes");
+                        updateBtn.disabled = !lastScannedCode;
+                    }
                 } else {
                     clearConfirmSelected();
                     manualContainer.style.display = "none";
@@ -695,10 +710,13 @@
                 return;
             }
 
+            const manualOpen = manualContainer.style.display === "block";
             const chosenLocation =
-                (manualContainer.style.display === "block" && manualInput.value)
+                (manualOpen && manualInput.value)
                     ? manualInput.value
-                    : (locationInput.value || "");
+                    : (locationInput.value || "").trim();
+
+            const locationCodeForInsert = manualOpen ? "" : lastResolvedLocationCode;
 
             fetch('/api/scanner/insert-detail', {
                 method: 'POST',
@@ -706,6 +724,7 @@
                 body: JSON.stringify({
                     code: lastScannedCode,
                     locationDesc: chosenLocation,
+                    locationCode: locationCodeForInsert,
                     remark1: remark1Input.value || "",
                     remark2: remark2Input.value || "",
                     remark3: remark3Input.value || ""

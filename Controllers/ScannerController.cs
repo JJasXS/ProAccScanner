@@ -258,6 +258,7 @@ ORDER BY DESCRIPTION
             string remark1 = (request.Remark1 ?? "").Trim();
             string remark2 = (request.Remark2 ?? "").Trim();
             string remark3 = (request.Remark3 ?? "").Trim();
+            string requestLocCode = (request.LocationCode ?? "").Trim();
 
             try
             {
@@ -278,19 +279,39 @@ WHERE UPPER(TRIM(I.CODE)) = '{safeCode}'
                     itemDesc = itemRows[0]["DESCRIPTION"].ToString()?.Trim() ?? "";
                 }
 
-                // ✅ Convert LOCATION DESCRIPTION -> LOCATION CODE
-                string locSql = $@"
+                // ✅ Convert LOCATION DESCRIPTION -> LOCATION CODE (primary)
+                string locationCode = "";
+                if (!string.IsNullOrWhiteSpace(locationDesc))
+                {
+                    string locSql = $@"
 SELECT FIRST 1 TRIM(CODE) AS CODE
 FROM ST_LOCATION
 WHERE UPPER(TRIM(DESCRIPTION)) = UPPER('{safeLocDesc}')
 ";
-                var locRows = _dbHelper.ExecuteSelect(locSql);
+                    var locRows = _dbHelper.ExecuteSelect(locSql);
 
-                string locationCode = "";
-                if (locRows != null && locRows.Count > 0 &&
-                    locRows[0].ContainsKey("CODE") && locRows[0]["CODE"] != null)
+                    if (locRows != null && locRows.Count > 0 &&
+                        locRows[0].ContainsKey("CODE") && locRows[0]["CODE"] != null)
+                    {
+                        locationCode = locRows[0]["CODE"].ToString()?.Trim() ?? "";
+                    }
+                }
+
+                // ✅ Fallback: resolve by location CODE (e.g. prior scan had code but no ST_LOCATION description match)
+                if (string.IsNullOrWhiteSpace(locationCode) && !string.IsNullOrWhiteSpace(requestLocCode))
                 {
-                    locationCode = locRows[0]["CODE"].ToString()?.Trim() ?? "";
+                    string safeReqLoc = EscapeSQL(requestLocCode);
+                    string locByCodeSql = $@"
+SELECT FIRST 1 TRIM(CODE) AS CODE
+FROM ST_LOCATION
+WHERE UPPER(TRIM(CODE)) = UPPER('{safeReqLoc}')
+";
+                    var locByCodeRows = _dbHelper.ExecuteSelect(locByCodeSql);
+                    if (locByCodeRows != null && locByCodeRows.Count > 0 &&
+                        locByCodeRows[0].ContainsKey("CODE") && locByCodeRows[0]["CODE"] != null)
+                    {
+                        locationCode = locByCodeRows[0]["CODE"].ToString()?.Trim() ?? "";
+                    }
                 }
 
                 if (string.IsNullOrWhiteSpace(locationCode))
@@ -368,6 +389,8 @@ VALUES
         {
             public string Code { get; set; } = "";
             public string? LocationDesc { get; set; }
+            /// <summary>Optional fallback when <see cref="LocationDesc"/> is empty (e.g. re-scan same location by code).</summary>
+            public string? LocationCode { get; set; }
             public string? Remark1 { get; set; }
             public string? Remark2 { get; set; }
             public string? Remark3 { get; set; }

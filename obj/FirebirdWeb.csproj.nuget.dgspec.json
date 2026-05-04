@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj": {}
+    "c:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj": {
+    "c:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj",
+        "projectUniqueName": "c:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj",
         "projectName": "FirebirdWeb",
-        "projectPath": "C:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj",
+        "projectPath": "c:\\Users\\sqlsupport\\ProAccScanner\\FirebirdWeb.csproj",
         "packagesPath": "C:\\Users\\sqlsupport\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sqlsupport\\ProAccScanner\\obj\\",
+        "outputPath": "c:\\Users\\sqlsupport\\ProAccScanner\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sqlsupport\\AppData\\Roaming\\NuGet\\NuGet.Config"
