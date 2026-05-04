@@ -1,0 +1,126 @@
+@* Shared email: pick operator from SCAN_EMAIL_OPERATOR (carousel) when multiple names exist. *@
+@if (Context.User?.Identity?.IsAuthenticated == true)
+{
+    <div id="scanner-operator-overlay" class="operator-prompt-overlay" role="dialog" aria-modal="true" aria-labelledby="scanner-operator-title" aria-hidden="true">
+        <div class="operator-prompt-card operator-prompt-card--wide">
+            <h3 id="scanner-operator-title" class="operator-prompt-title">Who is scanning?</h3>
+            <p class="operator-prompt-desc">This login has <strong>several people</strong> on file. Swipe to choose your name, then confirm. Scans will be stored under the name you pick.</p>
+            <p id="scanner-operator-hint" class="operator-prompt-hint"></p>
+            <div class="operator-carousel-wrap" aria-label="Operator names">
+                <div id="scanner-operator-rail" class="operator-carousel-rail"></div>
+            </div>
+            <p id="scanner-operator-err" class="operator-prompt-err" style="display:none;"></p>
+            <div class="operator-prompt-actions">
+                <button type="button" id="scanner-operator-confirm" class="operator-prompt-btn operator-prompt-btn--primary" disabled>Confirm selection</button>
+                <button type="button" id="scanner-operator-syuser" class="operator-prompt-btn operator-prompt-btn--outline">Use system account name instead</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            window.__scannerOperatorPromptPromise = new Promise(function (resolve) {
+                function finish() { resolve(); }
+                var overlay = document.getElementById("scanner-operator-overlay");
+                if (!overlay) {
+                    finish();
+                    return;
+                }
+                function post(payload) {
+                    return fetch("/api/Session/scanner-operator", {
+                        method: "POST",
+                        credentials: "same-origin",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    }).then(function (r) {
+                        return r.json().then(function (j) {
+                            return { ok: r.ok, j: j };
+                        });
+                    });
+                }
+                fetch("/api/Session/scanner-operator", { credentials: "same-origin" })
+                    .then(function (r) {
+                        if (!r.ok) {
+                            finish();
+                            return null;
+                        }
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (!data || !data.success || data.promptDone) {
+                            finish();
+                            return;
+                        }
+                        if (data.selectorMode !== "carousel" || !data.operators || data.operators.length < 2) {
+                            finish();
+                            return;
+                        }
+                        var hint = document.getElementById("scanner-operator-hint");
+                        if (hint) {
+                            hint.textContent = "System account (if you skip mapping): " + (data.sqlFallbackName || "—");
+                        }
+                        var rail = document.getElementById("scanner-operator-rail");
+                        var err = document.getElementById("scanner-operator-err");
+                        var confirmBtn = document.getElementById("scanner-operator-confirm");
+                        var selectedName = "";
+                        rail.innerHTML = "";
+                        data.operators.forEach(function (op, idx) {
+                            var name = (op && op.displayName) ? String(op.displayName) : "";
+                            if (!name) return;
+                            var card = document.createElement("button");
+                            card.type = "button";
+                            card.className = "operator-carousel-card";
+                            card.setAttribute("data-name", name);
+                            card.setAttribute("aria-pressed", "false");
+                            card.innerHTML = "<span class=\"operator-carousel-card__text\">" + name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\"/g, "&quot;") + "</span>";
+                            card.addEventListener("click", function () {
+                                rail.querySelectorAll(".operator-carousel-card").forEach(function (c) {
+                                    c.classList.remove("operator-carousel-card--selected");
+                                    c.setAttribute("aria-pressed", "false");
+                                });
+                                card.classList.add("operator-carousel-card--selected");
+                                card.setAttribute("aria-pressed", "true");
+                                selectedName = name;
+                                if (confirmBtn) confirmBtn.disabled = false;
+                            });
+                            rail.appendChild(card);
+                        });
+                        overlay.classList.add("show");
+                        overlay.setAttribute("aria-hidden", "false");
+                        if (confirmBtn) {
+                            confirmBtn.disabled = true;
+                            confirmBtn.onclick = function () {
+                                if (err) {
+                                    err.style.display = "none";
+                                    err.textContent = "";
+                                }
+                                if (!selectedName) return;
+                                post({ mode: "pick", displayName: selectedName }).then(function (res) {
+                                    if (!res.ok || !res.j || !res.j.success) {
+                                        if (err) {
+                                            err.textContent = (res.j && res.j.message) ? res.j.message : "Could not save.";
+                                            err.style.display = "block";
+                                        }
+                                        return;
+                                    }
+                                    overlay.classList.remove("show");
+                                    overlay.setAttribute("aria-hidden", "true");
+                                    finish();
+                                });
+                            };
+                        }
+                        document.getElementById("scanner-operator-syuser").onclick = function () {
+                            post({ mode: "syuser" }).then(function (res) {
+                                if (!res.ok || !res.j || !res.j.success) return;
+                                overlay.classList.remove("show");
+                                overlay.setAttribute("aria-hidden", "true");
+                                finish();
+                            });
+                        };
+                    })
+                    .catch(function () {
+                        finish();
+                    });
+            });
+        })();
+    </script>
+}

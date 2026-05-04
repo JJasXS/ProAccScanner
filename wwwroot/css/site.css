@@ -16,3 +16,173 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Shared: operator name prompt (shared email / maintenance login) */
+.operator-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  padding: 20px;
+}
+
+.operator-prompt-overlay.show {
+  display: flex;
+}
+
+.operator-prompt-card {
+  width: min(440px, calc(100% - 32px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+
+.operator-prompt-title {
+  margin: 0 0 10px 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.operator-prompt-desc {
+  margin: 0 0 10px 0;
+  color: #374151;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.operator-prompt-hint {
+  margin: 0 0 12px 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.operator-prompt-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.operator-prompt-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.operator-prompt-err {
+  margin: 8px 0 0 0;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.operator-prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.operator-prompt-btn {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.operator-prompt-btn--primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.operator-prompt-btn--primary:hover {
+  background: #1d4ed8;
+}
+
+.operator-prompt-btn--outline {
+  background: #fff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+}
+
+.operator-prompt-btn--outline:hover {
+  background: #f9fafb;
+}
+
+.operator-prompt-card--wide {
+  width: min(520px, calc(100% - 32px));
+}
+
+/* Horizontal scroll / carousel for operator names */
+.operator-carousel-wrap {
+  margin: 12px 0 4px 0;
+  padding: 4px 0 12px 0;
+  overflow: hidden;
+}
+
+.operator-carousel-rail {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 4px 14px 4px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.operator-carousel-rail::-webkit-scrollbar {
+  height: 6px;
+}
+
+.operator-carousel-rail::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.operator-carousel-card {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  min-width: 140px;
+  max-width: 200px;
+  min-height: 88px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.operator-carousel-card:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.operator-carousel-card--selected {
+  border-color: #2563eb;
+  background: #dbeafe;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.operator-carousel-card__text {
+  display: block;
+  line-height: 1.35;
+  word-break: break-word;
+}

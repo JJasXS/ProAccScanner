@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using FirebirdWeb.Helpers;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -237,10 +238,16 @@ ORDER BY DESCRIPTION
             // ✅ Require login session
             var sessionEmail = HttpContext.Session.GetString("UserEmail");
             if (string.IsNullOrWhiteSpace(sessionEmail))
+                sessionEmail = (User.FindFirst(ClaimTypes.Email)?.Value ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(sessionEmail))
                 return Unauthorized(new { success = false, message = "Not logged in." });
 
-            // ✅ Prefer UserName, fallback to Email
-            var sessionUser = (HttpContext.Session.GetString("UserName") ?? "").Trim();
+            // ✅ Shared email: optional operator name in session → SY_USER name → email
+            var sessionUser = (HttpContext.Session.GetString(ScannerOperatorSessionKeys.OperatorName) ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(sessionUser))
+                sessionUser = (HttpContext.Session.GetString("UserName") ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(sessionUser))
+                sessionUser = (User.FindFirst(ClaimTypes.Name)?.Value ?? "").Trim();
             if (string.IsNullOrWhiteSpace(sessionUser))
                 sessionUser = sessionEmail.Trim();
 

@@ -55,6 +55,27 @@ namespace FirebirdWeb.Controllers
             }
         }
 
+        private string GetSyUserName(string email)
+        {
+            try
+            {
+                using var con = _db.GetConnection();
+                const string sql = @"
+                    SELECT FIRST 1 NAME
+                    FROM SY_USER
+                    WHERE UPPER(EMAIL) = UPPER(@Email)
+                ";
+                using var cmd = new FbCommand(sql, con);
+                cmd.Parameters.AddWithValue("@Email", (email ?? "").Trim());
+                return cmd.ExecuteScalar()?.ToString()?.Trim() ?? "";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[DB ERROR] GetSyUserName: " + ex.Message);
+                return "";
+            }
+        }
+
         // POST: /api/login/sendotp
         [HttpPost("sendotp")]
         public IActionResult SendOTP([FromForm] string Email)
@@ -149,12 +170,15 @@ namespace FirebirdWeb.Controllers
             if (!valid)
                 return Ok(new { success = false, message = "Invalid or expired OTP" });
 
+            var sqlUserName = GetSyUserName(Email);
+            var displayName = string.IsNullOrWhiteSpace(sqlUserName) ? Email : sqlUserName;
+
             // Set persistent authentication cookie (never expires, only logs out on explicit logout)
             var claims = new List<System.Security.Claims.Claim>
             {
                 new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, Email),
                 new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, Email),
-                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Email)
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, displayName)
             };
             var identity = new System.Security.Claims.ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new System.Security.Claims.ClaimsPrincipal(identity);
@@ -168,12 +192,15 @@ namespace FirebirdWeb.Controllers
             ).Wait();
 
             HttpContext.Session.SetString("UserEmail", Email);
+            HttpContext.Session.SetString("UserName", sqlUserName);
+            HttpContext.Session.Remove(ScannerOperatorSessionKeys.PromptDone);
+            HttpContext.Session.Remove(ScannerOperatorSessionKeys.OperatorName);
 
             return Ok(new
             {
                 success = true,
                 message = "OTP verified successfully",
-                redirectUrl = "/Dashboard"
+                redirectUrl = "/Dashboard?loggedIn=true"
             });
         }
     }

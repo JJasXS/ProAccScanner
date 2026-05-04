@@ -43,5 +43,43 @@ END";
                 Console.WriteLine($"[DbInitializer] Warning: could not create trigger '{triggerName}': {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Optional mapping: one login email → many operator display names (scanner picks one per session).
+        /// If the email has no rows here, scans use SY_USER name only.
+        /// </summary>
+        public static void EnsureScanEmailOperatorTable(DbHelper db)
+        {
+            const string createTable = @"
+CREATE TABLE SCAN_EMAIL_OPERATOR (
+  EMAIL VARCHAR(250) NOT NULL,
+  DISPLAY_NAME VARCHAR(120) NOT NULL,
+  SORT_ORDER INTEGER DEFAULT 0,
+  ISACTIVE VARCHAR(1) DEFAULT 'Y',
+  CONSTRAINT PK_SCAN_EMAIL_OPR PRIMARY KEY (EMAIL, DISPLAY_NAME)
+)";
+            try
+            {
+                db.ExecuteNonQuery(createTable);
+                Console.WriteLine("[DbInitializer] Table SCAN_EMAIL_OPERATOR created.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DbInitializer] SCAN_EMAIL_OPERATOR create (may already exist): {ex.Message}");
+            }
+
+            const string createIdx = @"
+CREATE INDEX IDX_SCAN_EMAIL_OPR_EMAIL ON SCAN_EMAIL_OPERATOR (EMAIL)
+";
+            try
+            {
+                db.ExecuteNonQuery(createIdx);
+                Console.WriteLine("[DbInitializer] Index IDX_SCAN_EMAIL_OPR_EMAIL created.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DbInitializer] SCAN_EMAIL_OPERATOR index (may already exist): {ex.Message}");
+            }
+        }
     }
 }

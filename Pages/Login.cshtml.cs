@@ -194,6 +194,8 @@ namespace FirebirdWeb.Pages
             // ✅ Optional: keep session too
             HttpContext.Session.SetString("UserEmail", Email);
             HttpContext.Session.SetString("UserName", userName);
+            HttpContext.Session.Remove(ScannerOperatorSessionKeys.PromptDone);
+            HttpContext.Session.Remove(ScannerOperatorSessionKeys.OperatorName);
 
             return new JsonResult(new
             {
