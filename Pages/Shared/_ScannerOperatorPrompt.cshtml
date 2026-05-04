@@ -3,6 +3,55 @@
 @if (Context.User?.Identity?.IsAuthenticated == true)
 {
     var loginEmail = (User.FindFirst(ClaimTypes.Email)?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "").Trim();
+    @* Inline CSS: PWA/service worker or cache issues can prevent site.css from loading; popup must still look like a modal. *@
+    <style>
+        body.operator-popup-open { overflow: hidden; touch-action: none; }
+        .operator-popup-backdrop {
+            position: fixed; inset: 0; z-index: 2147483000;
+            background: rgba(15, 23, 42, 0.62);
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .operator-popup-backdrop--visible { opacity: 1; visibility: visible; pointer-events: auto; }
+        .operator-popup-shell {
+            position: fixed; inset: 0; z-index: 2147483001;
+            display: flex; align-items: center; justify-content: center;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .operator-popup-shell--visible { opacity: 1; visibility: visible; pointer-events: auto; }
+        @@keyframes operatorPopupIn {
+            from { opacity: 0; transform: scale(0.94) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .operator-popup-card { pointer-events: auto; max-height: min(90vh, 640px); overflow-y: auto; box-sizing: border-box; }
+        .operator-popup-shell--visible .operator-popup-card { animation: operatorPopupIn 0.24s ease-out both; }
+        .operator-prompt-card {
+            width: min(440px, calc(100% - 32px)); background: #fff; border-radius: 12px;
+            padding: 20px 18px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+        }
+        .operator-prompt-card--wide { width: min(520px, calc(100% - 32px)); }
+        .operator-prompt-title { margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 800; color: #111827; }
+        .operator-prompt-desc { margin: 0 0 10px 0; color: #374151; font-size: 0.95rem; line-height: 1.45; }
+        .operator-prompt-hint { margin: 0 0 12px 0; font-size: 0.85rem; color: #6b7280; }
+        .operator-prompt-label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        .operator-prompt-input {
+            width: 100%; box-sizing: border-box; padding: 10px 12px;
+            border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem;
+        }
+        .operator-prompt-err { margin: 8px 0 0 0; color: #b91c1c; font-size: 0.9rem; }
+        .operator-prompt-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+        .operator-prompt-btn {
+            width: 100%; padding: 11px 14px; border-radius: 8px; font-size: 0.95rem;
+            font-weight: 600; cursor: pointer; border: none;
+        }
+        .operator-prompt-btn--primary { background: #2563eb; color: #fff; }
+        .operator-prompt-btn--primary:hover { background: #1d4ed8; }
+        .operator-prompt-btn--outline { background: #fff; color: #1f2937; border: 1px solid #d1d5db; }
+        .operator-prompt-btn--outline:hover { background: #f9fafb; }
+    </style>
     <input type="hidden" id="scanner-operator-email" value="@loginEmail" />
     <div id="scanner-operator-overlay" class="operator-popup-backdrop" role="presentation"></div>
     <div id="scanner-operator-dialog" class="operator-popup-shell" role="dialog" aria-modal="true" aria-labelledby="scanner-operator-title" aria-hidden="true">

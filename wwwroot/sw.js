@@ -1,14 +1,15 @@
-const CACHE_NAME = 'scanner-system-v1';
+const CACHE_NAME = 'scanner-system-v3';
 const ASSETS_TO_CACHE = [
   '/',
-  '/css/site.css',
   '/css/index.css',
   '/images/logo.jpg'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll(ASSETS_TO_CACHE).catch(() => {})
+    )
   );
   self.skipWaiting();
 });
@@ -25,12 +26,20 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
+  const url = new URL(event.request.url);
+  // Always load styles from network so the UI (including modals) never uses a stale or broken cached CSS in standalone/PWA mode.
+  if (url.pathname.startsWith('/css/') || url.pathname.endsWith('.css')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
         const cloned = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+        if (response.ok) {
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+        }
         return response;
       }).catch(() => cached);
     })
