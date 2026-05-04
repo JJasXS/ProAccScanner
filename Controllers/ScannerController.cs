@@ -242,19 +242,22 @@ ORDER BY DESCRIPTION
             if (string.IsNullOrWhiteSpace(sessionEmail))
                 return Unauthorized(new { success = false, message = "Not logged in." });
 
-            // ✅ Shared email: optional operator name in session → SY_USER name → email
-            var sessionUser = (HttpContext.Session.GetString(ScannerOperatorSessionKeys.OperatorName) ?? "").Trim();
+            if (request == null || string.IsNullOrWhiteSpace(request.Code))
+            {
+                return BadRequest(new { success = false, message = "Code is required." });
+            }
+
+            // ✅ UDF_USER: browser-sent display name (localStorage) → SY_USER session name → claim → email
+            var fromClient = (request.OperatorDisplayName ?? "").Replace("\u00A0", " ").Trim();
+            if (fromClient.Length > 120)
+                fromClient = fromClient.Substring(0, 120);
+            var sessionUser = fromClient;
             if (string.IsNullOrWhiteSpace(sessionUser))
                 sessionUser = (HttpContext.Session.GetString("UserName") ?? "").Trim();
             if (string.IsNullOrWhiteSpace(sessionUser))
                 sessionUser = (User.FindFirst(ClaimTypes.Name)?.Value ?? "").Trim();
             if (string.IsNullOrWhiteSpace(sessionUser))
                 sessionUser = sessionEmail.Trim();
-
-            if (request == null || string.IsNullOrWhiteSpace(request.Code))
-            {
-                return BadRequest(new { success = false, message = "Code is required." });
-            }
 
             string code = (request.Code ?? "")
                 .Replace("\u00A0", " ")
@@ -398,6 +401,8 @@ VALUES
             public string? LocationDesc { get; set; }
             /// <summary>Optional fallback when <see cref="LocationDesc"/> is empty (e.g. re-scan same location by code).</summary>
             public string? LocationCode { get; set; }
+            /// <summary>Optional display name from browser localStorage (who is scanning).</summary>
+            public string? OperatorDisplayName { get; set; }
             public string? Remark1 { get; set; }
             public string? Remark2 { get; set; }
             public string? Remark3 { get; set; }

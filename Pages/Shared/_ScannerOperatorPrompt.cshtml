@@ -1,24 +1,72 @@
-@* Popup: pick operator from SCAN_EMAIL_OPERATOR (scroll row + confirm). *@
+@using System.Security.Claims
+@* After login: ask for scanner display name once per browser; stored in localStorage (per email). *@
 @if (Context.User?.Identity?.IsAuthenticated == true)
 {
+    var loginEmail = (User.FindFirst(ClaimTypes.Email)?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "").Trim();
+    <input type="hidden" id="scanner-operator-email" value="@loginEmail" />
     <div id="scanner-operator-overlay" class="operator-popup-backdrop" role="presentation"></div>
     <div id="scanner-operator-dialog" class="operator-popup-shell" role="dialog" aria-modal="true" aria-labelledby="scanner-operator-title" aria-hidden="true">
         <div class="operator-prompt-card operator-prompt-card--wide operator-popup-card">
-            <h3 id="scanner-operator-title" class="operator-prompt-title">Select your name</h3>
-            <p class="operator-prompt-desc">Choose the name that should appear on scans for this session. Swipe sideways if there are several options, then tap <strong>Confirm</strong>.</p>
+            <h3 id="scanner-operator-title" class="operator-prompt-title">Your name for scans</h3>
+            <p class="operator-prompt-desc">This device will remember it in the browser (per login email). It is sent with each scan so you can tell who scanned, even when the login email is shared.</p>
             <p id="scanner-operator-hint" class="operator-prompt-hint"></p>
-            <div class="operator-carousel-wrap" aria-label="Operator names">
-                <div id="scanner-operator-rail" class="operator-carousel-rail"></div>
-            </div>
+            <label class="operator-prompt-label" for="scanner-operator-input">Name to show on scans</label>
+            <input id="scanner-operator-input" class="operator-prompt-input" type="text" maxlength="120" autocomplete="name" placeholder="e.g. Ahmad" />
             <p id="scanner-operator-err" class="operator-prompt-err" style="display:none;"></p>
             <div class="operator-prompt-actions">
-                <button type="button" id="scanner-operator-confirm" class="operator-prompt-btn operator-prompt-btn--primary" disabled>Confirm selection</button>
-                <button type="button" id="scanner-operator-syuser" class="operator-prompt-btn operator-prompt-btn--outline">Use system account name instead</button>
+                <button type="button" id="scanner-operator-save" class="operator-prompt-btn operator-prompt-btn--primary">Save and continue</button>
+                <button type="button" id="scanner-operator-syuser" class="operator-prompt-btn operator-prompt-btn--outline">Use system account name only</button>
             </div>
         </div>
     </div>
     <script>
         (function () {
+            function storageKey() {
+                var el = document.getElementById("scanner-operator-email");
+                var email = (el && el.value) ? String(el.value).trim().toLowerCase() : "";
+                return "proacc_scanner_operator_v1::" + email;
+            }
+            var SY_SENTINEL = "__USE_SY_USER__";
+            function readStored() {
+                try {
+                    var raw = localStorage.getItem(storageKey());
+                    if (raw == null) return "";
+                    var v = String(raw).trim();
+                    if (v === SY_SENTINEL) return "";
+                    return v;
+                } catch (e) {
+                    return "";
+                }
+            }
+            function hasStoredChoice() {
+                try {
+                    return localStorage.getItem(storageKey()) != null;
+                } catch (e) {
+                    return false;
+                }
+            }
+            function writeStored(name) {
+                try {
+                    var v = (name || "").trim();
+                    if (!v) {
+                        localStorage.removeItem(storageKey());
+                        return;
+                    }
+                    if (v.length > 120) v = v.slice(0, 120);
+                    localStorage.setItem(storageKey(), v);
+                } catch (e) { /* private mode etc. */ }
+            }
+            function writeUseSyUserOnly() {
+                try {
+                    localStorage.setItem(storageKey(), SY_SENTINEL);
+                } catch (e) { /* ignore */ }
+            }
+            window.ProAccScannerOperator = {
+                storageKey: storageKey,
+                read: readStored,
+                write: writeStored
+            };
+
             window.__scannerOperatorPromptPromise = new Promise(function (resolve) {
                 function finish() {
                     document.body.classList.remove("operator-popup-open");
@@ -30,105 +78,48 @@
                     finish();
                     return;
                 }
-                function post(payload) {
-                    return fetch("/api/Session/scanner-operator", {
-                        method: "POST",
-                        credentials: "same-origin",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    }).then(function (r) {
-                        return r.json().then(function (j) {
-                            return { ok: r.ok, j: j };
-                        });
-                    });
+                if (hasStoredChoice()) {
+                    finish();
+                    return;
                 }
-                fetch("/api/Session/scanner-operator", { credentials: "same-origin" })
-                    .then(function (r) {
-                        if (!r.ok) {
-                            finish();
-                            return null;
+                var hint = document.getElementById("scanner-operator-hint");
+                if (hint) {
+                    hint.textContent = "If you skip typing a name, scans use the SQL account name for this login.";
+                }
+                var input = document.getElementById("scanner-operator-input");
+                var err = document.getElementById("scanner-operator-err");
+                document.body.classList.add("operator-popup-open");
+                backdrop.classList.add("operator-popup-backdrop--visible");
+                dialog.classList.add("operator-popup-shell--visible");
+                dialog.setAttribute("aria-hidden", "false");
+                if (input) setTimeout(function () { input.focus(); }, 50);
+
+                document.getElementById("scanner-operator-save").onclick = function () {
+                    if (err) {
+                        err.style.display = "none";
+                        err.textContent = "";
+                    }
+                    var name = (input && input.value) ? input.value.trim() : "";
+                    if (!name) {
+                        if (err) {
+                            err.textContent = "Please enter a name, or choose “Use system account name only”.";
+                            err.style.display = "block";
                         }
-                        return r.json();
-                    })
-                    .then(function (data) {
-                        if (!data || !data.success || data.promptDone) {
-                            finish();
-                            return;
-                        }
-                        if (data.selectorMode !== "carousel" || !data.operators || data.operators.length < 1) {
-                            finish();
-                            return;
-                        }
-                        var hint = document.getElementById("scanner-operator-hint");
-                        if (hint) {
-                            hint.textContent = "System account (if you skip mapping): " + (data.sqlFallbackName || "—");
-                        }
-                        var rail = document.getElementById("scanner-operator-rail");
-                        var err = document.getElementById("scanner-operator-err");
-                        var confirmBtn = document.getElementById("scanner-operator-confirm");
-                        var selectedName = "";
-                        rail.innerHTML = "";
-                        data.operators.forEach(function (op, idx) {
-                            var name = (op && op.displayName) ? String(op.displayName) : "";
-                            if (!name) return;
-                            var card = document.createElement("button");
-                            card.type = "button";
-                            card.className = "operator-carousel-card";
-                            card.setAttribute("data-name", name);
-                            card.setAttribute("aria-pressed", "false");
-                            card.innerHTML = "<span class=\"operator-carousel-card__text\">" + name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\"/g, "&quot;") + "</span>";
-                            card.addEventListener("click", function () {
-                                rail.querySelectorAll(".operator-carousel-card").forEach(function (c) {
-                                    c.classList.remove("operator-carousel-card--selected");
-                                    c.setAttribute("aria-pressed", "false");
-                                });
-                                card.classList.add("operator-carousel-card--selected");
-                                card.setAttribute("aria-pressed", "true");
-                                selectedName = name;
-                                if (confirmBtn) confirmBtn.disabled = false;
-                            });
-                            rail.appendChild(card);
-                        });
-                        document.body.classList.add("operator-popup-open");
-                        backdrop.classList.add("operator-popup-backdrop--visible");
-                        dialog.classList.add("operator-popup-shell--visible");
-                        dialog.setAttribute("aria-hidden", "false");
-                        if (confirmBtn) {
-                            confirmBtn.disabled = true;
-                            confirmBtn.onclick = function () {
-                                if (err) {
-                                    err.style.display = "none";
-                                    err.textContent = "";
-                                }
-                                if (!selectedName) return;
-                                post({ mode: "pick", displayName: selectedName }).then(function (res) {
-                                    if (!res.ok || !res.j || !res.j.success) {
-                                        if (err) {
-                                            err.textContent = (res.j && res.j.message) ? res.j.message : "Could not save.";
-                                            err.style.display = "block";
-                                        }
-                                        return;
-                                    }
-                                    backdrop.classList.remove("operator-popup-backdrop--visible");
-                                    dialog.classList.remove("operator-popup-shell--visible");
-                                    dialog.setAttribute("aria-hidden", "true");
-                                    finish();
-                                });
-                            };
-                        }
-                        document.getElementById("scanner-operator-syuser").onclick = function () {
-                            post({ mode: "syuser" }).then(function (res) {
-                                if (!res.ok || !res.j || !res.j.success) return;
-                                backdrop.classList.remove("operator-popup-backdrop--visible");
-                                dialog.classList.remove("operator-popup-shell--visible");
-                                dialog.setAttribute("aria-hidden", "true");
-                                finish();
-                            });
-                        };
-                    })
-                    .catch(function () {
-                        finish();
-                    });
+                        return;
+                    }
+                    writeStored(name);
+                    backdrop.classList.remove("operator-popup-backdrop--visible");
+                    dialog.classList.remove("operator-popup-shell--visible");
+                    dialog.setAttribute("aria-hidden", "true");
+                    finish();
+                };
+                document.getElementById("scanner-operator-syuser").onclick = function () {
+                    writeUseSyUserOnly();
+                    backdrop.classList.remove("operator-popup-backdrop--visible");
+                    dialog.classList.remove("operator-popup-shell--visible");
+                    dialog.setAttribute("aria-hidden", "true");
+                    finish();
+                };
             });
         })();
     </script>

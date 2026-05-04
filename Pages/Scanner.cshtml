@@ -725,6 +725,9 @@
                     code: lastScannedCode,
                     locationDesc: chosenLocation,
                     locationCode: locationCodeForInsert,
+                    operatorDisplayName: (typeof window.ProAccScannerOperator !== "undefined" && window.ProAccScannerOperator.read)
+                        ? window.ProAccScannerOperator.read()
+                        : "",
                     remark1: remark1Input.value || "",
                     remark2: remark2Input.value || "",
                     remark3: remark3Input.value || ""

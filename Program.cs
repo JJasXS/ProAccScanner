@@ -80,6 +80,6 @@ app.MapControllers();
 // ✅ Ensure DB triggers exist (idempotent — safe to run every startup)
 var dbHelper = app.Services.GetRequiredService<DbHelper>();
 DbInitializer.EnsureTriggers(dbHelper);
-DbInitializer.EnsureScanEmailOperatorTable(dbHelper);
+DbInitializer.DropScanEmailOperatorTableIfExists(dbHelper);
 
 app.Run();

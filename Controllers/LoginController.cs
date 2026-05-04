@@ -193,8 +193,6 @@ namespace FirebirdWeb.Controllers
 
             HttpContext.Session.SetString("UserEmail", Email);
             HttpContext.Session.SetString("UserName", sqlUserName);
-            HttpContext.Session.Remove(ScannerOperatorSessionKeys.PromptDone);
-            HttpContext.Session.Remove(ScannerOperatorSessionKeys.OperatorName);
 
             return Ok(new
             {
