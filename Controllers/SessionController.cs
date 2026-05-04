@@ -117,23 +117,7 @@ ORDER BY COALESCE(O.SORT_ORDER, 0), O.DISPLAY_NAME
                 });
             }
 
-            // Exactly one mapped name → use it without showing UI
-            if (mapped.Count == 1)
-            {
-                HttpContext.Session.SetString(ScannerOperatorSessionKeys.OperatorName, mapped[0]);
-                HttpContext.Session.SetString(ScannerOperatorSessionKeys.PromptDone, "1");
-                return Ok(new
-                {
-                    success = true,
-                    promptDone = true,
-                    selectorMode = "none",
-                    operators = Array.Empty<object>(),
-                    sqlFallbackName = sqlName,
-                    currentOperator = mapped[0]
-                });
-            }
-
-            // Two or more → carousel picker
+            // One or more mapped names → show popup (carousel) so user explicitly selects / confirms
             var ops = mapped.Select(d => new { displayName = d }).ToList();
             return Ok(new
             {

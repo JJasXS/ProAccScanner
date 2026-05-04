@@ -1,10 +1,11 @@
-@* Shared email: pick operator from SCAN_EMAIL_OPERATOR (carousel) when multiple names exist. *@
+@* Popup: pick operator from SCAN_EMAIL_OPERATOR (scroll row + confirm). *@
 @if (Context.User?.Identity?.IsAuthenticated == true)
 {
-    <div id="scanner-operator-overlay" class="operator-prompt-overlay" role="dialog" aria-modal="true" aria-labelledby="scanner-operator-title" aria-hidden="true">
-        <div class="operator-prompt-card operator-prompt-card--wide">
-            <h3 id="scanner-operator-title" class="operator-prompt-title">Who is scanning?</h3>
-            <p class="operator-prompt-desc">This login has <strong>several people</strong> on file. Swipe to choose your name, then confirm. Scans will be stored under the name you pick.</p>
+    <div id="scanner-operator-overlay" class="operator-popup-backdrop" role="presentation"></div>
+    <div id="scanner-operator-dialog" class="operator-popup-shell" role="dialog" aria-modal="true" aria-labelledby="scanner-operator-title" aria-hidden="true">
+        <div class="operator-prompt-card operator-prompt-card--wide operator-popup-card">
+            <h3 id="scanner-operator-title" class="operator-prompt-title">Select your name</h3>
+            <p class="operator-prompt-desc">Choose the name that should appear on scans for this session. Swipe sideways if there are several options, then tap <strong>Confirm</strong>.</p>
             <p id="scanner-operator-hint" class="operator-prompt-hint"></p>
             <div class="operator-carousel-wrap" aria-label="Operator names">
                 <div id="scanner-operator-rail" class="operator-carousel-rail"></div>
@@ -19,9 +20,13 @@
     <script>
         (function () {
             window.__scannerOperatorPromptPromise = new Promise(function (resolve) {
-                function finish() { resolve(); }
-                var overlay = document.getElementById("scanner-operator-overlay");
-                if (!overlay) {
+                function finish() {
+                    document.body.classList.remove("operator-popup-open");
+                    resolve();
+                }
+                var backdrop = document.getElementById("scanner-operator-overlay");
+                var dialog = document.getElementById("scanner-operator-dialog");
+                if (!backdrop || !dialog) {
                     finish();
                     return;
                 }
@@ -50,7 +55,7 @@
                             finish();
                             return;
                         }
-                        if (data.selectorMode !== "carousel" || !data.operators || data.operators.length < 2) {
+                        if (data.selectorMode !== "carousel" || !data.operators || data.operators.length < 1) {
                             finish();
                             return;
                         }
@@ -84,8 +89,10 @@
                             });
                             rail.appendChild(card);
                         });
-                        overlay.classList.add("show");
-                        overlay.setAttribute("aria-hidden", "false");
+                        document.body.classList.add("operator-popup-open");
+                        backdrop.classList.add("operator-popup-backdrop--visible");
+                        dialog.classList.add("operator-popup-shell--visible");
+                        dialog.setAttribute("aria-hidden", "false");
                         if (confirmBtn) {
                             confirmBtn.disabled = true;
                             confirmBtn.onclick = function () {
@@ -102,8 +109,9 @@
                                         }
                                         return;
                                     }
-                                    overlay.classList.remove("show");
-                                    overlay.setAttribute("aria-hidden", "true");
+                                    backdrop.classList.remove("operator-popup-backdrop--visible");
+                                    dialog.classList.remove("operator-popup-shell--visible");
+                                    dialog.setAttribute("aria-hidden", "true");
                                     finish();
                                 });
                             };
@@ -111,8 +119,9 @@
                         document.getElementById("scanner-operator-syuser").onclick = function () {
                             post({ mode: "syuser" }).then(function (res) {
                                 if (!res.ok || !res.j || !res.j.success) return;
-                                overlay.classList.remove("show");
-                                overlay.setAttribute("aria-hidden", "true");
+                                backdrop.classList.remove("operator-popup-backdrop--visible");
+                                dialog.classList.remove("operator-popup-shell--visible");
+                                dialog.setAttribute("aria-hidden", "true");
                                 finish();
                             });
                         };

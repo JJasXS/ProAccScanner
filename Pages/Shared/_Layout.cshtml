@@ -15,11 +15,13 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
+    @RenderBody()
+
+    @* Modal must render after page content so it stacks above the app (z-index + paint order). *@
     @if (Context.User?.Identity?.IsAuthenticated == true)
     {
         @await Html.PartialAsync("_ScannerOperatorPrompt")
     }
-    @RenderBody()
 
     <script>
         if ('serviceWorker' in navigator) {
